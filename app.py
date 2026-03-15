@@ -4,7 +4,11 @@ from routes.student_routes import student_bp
 from routes.attendance_routes import attendance_bp
 
 app = Flask(__name__)
+
+app.secret_key = "attendance_secret_key"
+
 app.config.from_object("config.Config")
+
 
 # Register Blueprints
 app.register_blueprint(auth_bp)
