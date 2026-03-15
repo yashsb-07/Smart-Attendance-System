@@ -1,4 +1,7 @@
-DB_HOST = "localhost"
-DB_USER = "root"
-DB_PASSWORD = "R!t!k@*1606."
-DB_NAME = "smart_attendance"
+class Config:
+    SECRET_KEY = "attendance_secret_key"
+
+    MYSQL_HOST = "localhost"
+    MYSQL_USER = "root"
+    MYSQL_PASSWORD = ""
+    MYSQL_DATABASE = "attendance_system"

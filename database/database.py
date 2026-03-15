@@ -1,6 +1,6 @@
 import bcrypt
 import mysql.connector
-from config import DB_HOST, DB_USER, DB_PASSWORD, DB_NAME
+from configuration_old import DB_HOST, DB_USER, DB_PASSWORD, DB_NAME
 
 def get_db_connection():
     return mysql.connector.connect(
