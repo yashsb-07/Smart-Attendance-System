@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file, jsonify, Response
-import face_registration
-import attendance_recognition
-from database import get_db_connection
+import face_recognition.face_registration as face_registration
+import face_recognition.attendance_recognition as attendance_recognition
+from database.database import get_db_connection
 import bcrypt
 import pandas as pd
 from fpdf import FPDF

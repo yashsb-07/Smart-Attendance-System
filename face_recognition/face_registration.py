@@ -1,7 +1,7 @@
 import cv2
 import face_recognition
 import numpy as np
-from database import get_db_connection
+from database.database import get_db_connection
 import os
 import base64
 
