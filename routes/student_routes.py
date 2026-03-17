@@ -8,13 +8,16 @@ def register_student():
 
     if request.method == "GET":
         return render_template("register_student.html")
-
-    # Handle form submission
+    
+    #Handle form submission
     name = request.form["name"]
     roll_number = request.form["roll_number"]
     department = request.form["department"]
     student_class = request.form["class"]
     semester = request.form["semester"]
+    image_data = request.form["image_data"]
+
+    print("Image received!")  # Debug
 
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -31,4 +34,4 @@ def register_student():
     cursor.close()
     conn.close()
 
-    return "Student Registered Successfully"
+    return "Student Registered Successfully with Image"

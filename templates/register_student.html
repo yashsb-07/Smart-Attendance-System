@@ -25,9 +25,42 @@
     <label>Semester:</label><br>
     <input type="text" name="semester"><br><br>
 
+    <!-- Camera -->
+    <h3>Capture Face</h3>
+
+    <video id="video" width="300" height="200" autoplay></video><br><br>
+    <button type="button" onclick="captureImage()">Capture</button><br><br>
+
+    <canvas id="canvas" width="300" height="200" style="display:none;"></canvas>
+
+    <input type="hidden" name="image_data" id="image_data">
+
     <button type="submit">Register</button>
 
 </form>
+
+<script>
+    const video = document.getElementById('video');
+
+    // Access webcam
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+            video.srcObject = stream;
+        });
+
+    function captureImage() {
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+
+        context.drawImage(video, 0, 0, 300, 200);
+
+        const imageData = canvas.toDataURL('image/png');
+
+        document.getElementById('image_data').value = imageData;
+
+        alert("Image Captured!");
+    }
+</script>
 
 </body>
 </html>
