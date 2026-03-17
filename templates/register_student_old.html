@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register Student - Smart Attendance System</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <style>
+    /* Background Styling */
+    body {
+      background: linear-gradient(135deg, #FFDEE9, #B5FFFC);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    .container {
+      flex: 1;
+    }
+
+    /* Navbar */
+    .navbar {
+      background-color: #343a40;
+    }
+
+    /* Form Card Styling with Glass Effect */
+    .card {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      max-width: 600px;
+      width: 100%;
+      animation: slideIn 0.8s ease-in-out;
+      transition: transform 0.3s ease-in-out;
+    }
+
+    @media (min-width: 992px) {
+      .card {
+        max-width: 700px;
+      }
+    }
+
+    .card h2 {
+      color: #333;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    /* Stop Animation on Form Focus */
+    .card:hover {
+      animation: none;
+    }
+
+    /* Form Styling */
+    .form-select,
+    .form-control {
+      background-color: rgba(255, 255, 255, 0.9);
+      border-radius: 12px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      padding: 12px;
+      font-size: 16px;
+      color: #333;
+      transition: all 0.3s;
+    }
+
+    .form-select:hover,
+    .form-control:hover {
+      border-color: #FF7EB3;
+    }
+
+    .form-select:focus,
+    .form-control:focus {
+      border-color: #FF7EB3;
+      box-shadow: 0 0 10px rgba(255, 126, 179, 0.5);
+    }
+
+    /* Button Styling with Hover Animation */
+    .btn-primary {
+      background: linear-gradient(45deg, #FF7EB3, #FFB07C);
+      border: none;
+      transition: transform 0.3s ease, background 0.3s ease;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(45deg, #FFB07C, #FF7EB3);
+      transform: translateY(-3px);
+    }
+
+    /* Loading Animation */
+    #loading {
+      display: none;
+    }
+
+    .spinner-border {
+      color: #FF7EB3;
+    }
+
+    /* Footer Styling */
+    .footer {
+      background-color: #343a40;
+      color: white;
+      padding: 10px 0;
+      text-align: center;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateY(50px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    #camera {
+  width: 100%;
+  height: 400px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 1px solid #ccc;
+}
+
+  </style>
+</head>
+
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="/">Smart Attendance System</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link active" href="/register-student">Register Student</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/mark-attendance">Mark Attendance</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/admin-dashboard">Admin Dashboard</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Registration Form Section -->
+  <div class="container mt-5">
+    <div class="row justify-content-center">
+      <!-- Form Section -->
+      <div class="col-lg-6 col-md-8">
+        <div class="card">
+          <h2 class="text-center mb-4">📸 Student Registration</h2>
+  
+          {% if message %}
+          <div class="alert {% if '✅' in message %}alert-success{% elif '❌' in message or '⚠️' in message %}alert-danger{% else %}alert-info{% endif %}">
+            {{ message }}
+          </div>
+          {% endif %}
+  
+          <!-- <form action="/register-student" method="post" onsubmit="showLoading()"> -->
+            <form id="registerForm" onsubmit="captureAndSendImage(); return false;">
+
+            <div class="mb-3">
+              <label for="name" class="form-label">👤 Student Name</label>
+              <input type="text" class="form-control" id="name" name="name" placeholder="Enter Student Name" required />
+            </div>
+  
+            <div class="mb-3">
+              <label for="roll_number" class="form-label">🔢 Roll Number</label>
+              <input type="text" class="form-control" id="roll_number" name="roll_number"
+                placeholder="Enter Roll Number" required />
+            </div>
+  
+            <!-- Department Dropdown -->
+            <div class="mb-3">
+              <label for="department" class="form-label">🏢 Department</label>
+              <select class="form-select" id="department" name="department" required>
+                <option value="" disabled selected>Select Department</option>
+                <option value="BBA(CA)">BBA (CA)</option>
+                <option value="BSc(CS)">BSc (CS)</option>
+                <option value="BCom">BCom</option>
+                <option value="BBA">BBA</option>
+                <option value="CDS">CDS</option>
+                <option value="MCom">MCom</option>
+                <option value="MSc">MSc</option>
+                <option value="MSc(CA)">MSc (CA)</option>
+              </select>
+            </div>
+  
+            <!-- Class Dropdown -->
+            <div class="mb-3">
+              <label for="class" class="form-label">🏫 Class</label>
+              <select class="form-select" id="class" name="class" required>
+                <option value="" disabled selected>Select Class</option>
+                <option value="FY">First Year (FY)</option>
+                <option value="SY">Second Year (SY)</option>
+                <option value="TY">Third Year (TY)</option>
+                <option value="Final">Final Year</option>
+              </select>
+            </div>
+  
+            <!-- Semester Dropdown -->
+            <div class="mb-3">
+              <label for="semester" class="form-label">📅 Semester</label>
+              <select class="form-select" id="semester" name="semester" required>
+                <option value="" disabled selected>Select Semester</option>
+                <option value="1">Semester 1</option>
+                <option value="2">Semester 2</option>
+                <option value="3">Semester 3</option>
+                <option value="4">Semester 4</option>
+                <option value="5">Semester 5</option>
+                <option value="6">Semester 6</option>
+                <option value="7">Semester 7</option>
+                <option value="8">Semester 8</option>
+              </select>
+            </div>
+  
+            <button type="submit" class="btn btn-primary w-100">📷 Register & Capture Face</button>
+          </form>
+        </div>
+      </div>
+  
+      <!-- Camera Section -->
+      <div class="col-lg-5 col-md-8">
+        <div class="card">
+          <h2 class="text-center mb-4">📸 Camera Preview</h2>
+          <video id="camera" autoplay playsinline></video>
+        </div>
+      </div>
+    </div>
+  </div>  
+
+      <!-- Loading Animation -->
+      <div id="loading" class="text-center mt-4">
+        <div class="spinner-border" role="status"></div>
+        <p class="mt-2">Processing... Please wait while we capture your face.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer mt-auto">
+    <p>&copy; 2025 Smart Attendance System. All rights reserved.</p>
+  </footer>
+
+  <script>
+    function showLoading() {
+      document.getElementById("loading").style.display = "block";
+    }
+  </script>
+  <script>
+    async function startCamera() {
+      const video = document.getElementById('camera');
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = stream;
+      } catch (error) {
+        console.error('Error accessing camera:', error);
+        video.parentElement.innerHTML = '<p class="text-danger">❗ Camera access failed. Please check your permissions.</p>';
+      }
+    }
+    startCamera();
+
+    async function captureAndSendImage() {
+  const video = document.getElementById('camera');
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d');
+
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  const imageData = canvas.toDataURL('image/jpeg'); // Convert to Base64
+
+  const formData = new FormData(document.getElementById('registerForm'));
+  formData.append('image_data', imageData);
+
+  try {
+    const response = await fetch('/register-student', {
+      method: 'POST',
+      body: formData
+    });
+
+    const result = await response.text();
+    document.body.innerHTML = result;
+  } catch (error) {
+    console.error('Error:', error);
+    alert('❌ Error submitting form. Please try again.');
+  }
+}
+
+  
+  </script>
+  
+</body>
+
+</html>
