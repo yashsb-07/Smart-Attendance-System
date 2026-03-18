@@ -1,7 +1,64 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, request
+from database.db import get_db_connection
+from utils.face_utils import get_face_encoding
+import numpy as np
+from datetime import datetime
 
 attendance_bp = Blueprint("attendance", __name__)
 
-@attendance_bp.route("/mark_attendance")
+@attendance_bp.route("/mark_attendance", methods=["GET", "POST"])
 def mark_attendance():
-    return render_template("mark_attendance.html")
+
+    if request.method == "GET":
+        return render_template("mark_attendance.html")
+
+    data = request.get_json()
+    image_data = data["image"]
+
+    encoding = get_face_encoding(image_data)
+
+    if encoding is None:
+        return "No face detected"
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("SELECT * FROM students")
+    students = cursor.fetchall()
+
+    for student in students:
+
+        if student["face_encoding"] is None:
+            continue  # skip invalid records
+
+        stored_encoding = np.frombuffer(student["face_encoding"], dtype=np.float64)
+
+        match = np.linalg.norm(stored_encoding - encoding)
+
+        if match < 0.6:
+            # Mark attendance
+            now = datetime.now()
+
+            cursor.execute("""
+                INSERT INTO attendance (student_id, date, time, subject, status, session)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (
+                student["id"],
+                now.date(),
+                now.time(),
+                "Subject1",
+                "Present",
+                1
+            ))
+
+            conn.commit()
+
+            cursor.close()
+            conn.close()
+
+            return f"Attendance Marked for {student['name']}"
+
+    cursor.close()
+    conn.close()
+
+    return "Face not recognized"
