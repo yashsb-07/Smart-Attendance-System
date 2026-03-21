@@ -8,6 +8,28 @@
 
 <h2>Mark Attendance</h2>
 
+<label>Subject:</label>
+<select id="subject">
+    <option value="Math">Math</option>
+    <option value="OS">OS</option>
+    <option value="DBMS">DBMS</option>
+    <option value="Python">Python</option>
+</select>
+
+<br><br>
+
+<label>Session:</label>
+<select id="session">
+    <option value="1">Lecture 1</option>
+    <option value="2">Lecture 2</option>
+    <option value="3">Lecture 3</option>
+    <option value="4">Lecture 4</option>
+    <option value="5">Lecture 5</option>
+    <option value="6">Sign Out</option>
+</select>
+
+<br><br>
+
 <video id="video" width="300" height="200" autoplay></video><br><br>
 
 <button onclick="capture()">Mark Attendance</button>
@@ -30,12 +52,19 @@
 
         const imageData = canvas.toDataURL('image/png');
 
+        const subject = document.getElementById('subject').value;
+        const session = document.getElementById('session').value;
+
         fetch('/mark_attendance', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ image: imageData })
+            body: JSON.stringify({
+                image: imageData,
+                subject: subject,
+                session: session
+            })
         })
         .then(res => res.text())
         .then(data => alert(data));

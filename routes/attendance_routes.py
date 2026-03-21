@@ -14,6 +14,8 @@ def mark_attendance():
 
     data = request.get_json()
     image_data = data["image"]
+    subject = data["subject"]
+    session_number = data["session"]
 
     encoding = get_face_encoding(image_data)
 
@@ -36,19 +38,32 @@ def mark_attendance():
         match = np.linalg.norm(stored_encoding - encoding)
 
         if match < 0.6:
+
             # Mark attendance
             now = datetime.now()
 
+            # Check if already marked
+            cursor.execute("""
+                SELECT * FROM attendance
+                WHERE student_id = %s AND date = %s AND session = %s
+            """, (student["id"], now.date(), session_number))
+
+            existing = cursor.fetchone()
+
+            if existing:
+                cursor.close()
+                conn.close()
+                return f"Attendance already marked for {student['name']} (Session {session_number})"
+
             cursor.execute("""
                 INSERT INTO attendance (student_id, date, time, subject, status, session)
-                VALUES (%s, %s, %s, %s, %s, %s)
-            """, (
-                student["id"],
-                now.date(),
-                now.time(),
-                "Subject1",
-                "Present",
-                1
+                VALUES (%s, %s, %s, %s, %s, %s)""", (
+                    student["id"],
+                    now.date(),
+                    now.time(),
+                    subject,
+                    "Present",
+                    session_number
             ))
 
             conn.commit()
