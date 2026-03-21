@@ -1,16 +1,146 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Dashboard</title>
+    <title>Admin Dashboard</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style>
+        body {
+            display: flex;
+        }
+        .sidebar {
+            width: 220px;
+            height: 100vh;
+            background: #343a40;
+            color: white;
+            padding: 20px;
+        }
+        .sidebar a {
+            color: white;
+            display: block;
+            margin: 10px 0;
+            text-decoration: none;
+        }
+        .content {
+            flex: 1;
+            padding: 20px;
+        }
+        .card {
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 
 <body>
 
-<h1>Admin Dashboard</h1>
+<div class="sidebar">
+    <h3>Admin Panel</h3>
+    <a href="/dashboard">Dashboard</a>
+    <a href="/register_student">Register Student</a>
+    <a href="/mark_attendance">Mark Attendance</a>
+    <a href="/logout">Logout</a>
+</div>
 
-<p>Welcome to Smart Attendance System</p>
+<div class="content">
 
-<a href="/logout">Logout</a>
+    <h2>Dashboard</h2>
+
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5>Total Students</h5>
+                    <h3>{{ total_students }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5>Attendance Today</h5>
+                    <h3>{{ attendance_today }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <h5>Present Today</h5>
+                    <h3>{{ present_today }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-danger text-white">
+                <div class="card-body">
+                    <h5>Attendance %</h5>
+                    <h3>{{ attendance_percentage }}%</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <canvas id="attendanceChart" width="400" height="150"></canvas>
+
+    <h3 class="mt-4">Recent Attendance</h3>
+
+    <table class="table table-bordered">
+        <tr>
+            <th>Name</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Subject</th>
+            <th>Session</th>
+        </tr>
+
+        {% for row in recent_attendance %}
+        <tr>
+            <td>{{ row.name }}</td>
+            <td>{{ row.date }}</td>
+            <td>{{ row.time }}</td>
+            <td>{{ row.subject }}</td>
+            <td>{{ row.session }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+</div>
+
+<script>
+    const ctx = document.getElementById('attendanceChart').getContext('2d');
+
+    const present = Number("{{ present_today }}");
+    const absent = Number("{{ absent_today }}");
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Present', 'Absent'],
+            datasets: [{
+                label: 'Attendance',
+                data: [present, absent],
+                backgroundColor: ['green', 'red']
+            }]
+        },
+        options: {
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Today Attendance Overview'
+                }
+            }
+        }
+    });
+</script>
 
 </body>
 </html>
