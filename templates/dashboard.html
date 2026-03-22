@@ -14,19 +14,26 @@
         body {
             display: flex;
         }
+        
         .sidebar {
-            width: 220px;
+            width: 240px;
             height: 100vh;
-            background: #343a40;
-            color: white;
-            padding: 20px;
+            background: #1f2937;
         }
+
         .sidebar a {
-            color: white;
             display: block;
-            margin: 10px 0;
+            color: #cbd5e1;
+            padding: 10px;
             text-decoration: none;
+            border-radius: 5px;
         }
+
+        .sidebar a:hover {
+            background: #374151;
+            color: white;
+        }
+
         .content {
             flex: 1;
             padding: 20px;
@@ -39,8 +46,10 @@
 
 <body>
 
-<div class="sidebar">
-    <h3>Admin Panel</h3>
+<div class="sidebar p-3">
+    <h4 class="text-white">Smart Attendance</h4>
+    <hr class="text-white">
+
     <a href="/dashboard">Dashboard</a>
     <a href="/register_student">Register Student</a>
     <a href="/mark_attendance">Mark Attendance</a>

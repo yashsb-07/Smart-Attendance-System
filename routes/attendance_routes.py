@@ -1,5 +1,6 @@
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table
 from flask import Blueprint, render_template, request, send_file
+from face_recognition.liveness_detection import detect_liveness
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.pagesizes import letter
 from database.db import get_db_connection
@@ -8,6 +9,8 @@ import numpy as np
 from datetime import datetime
 import pandas as pd
 import os
+import base64
+import cv2
 
 attendance_bp = Blueprint("attendance", __name__)
 
@@ -18,15 +21,38 @@ def mark_attendance():
         return render_template("mark_attendance.html")
 
     data = request.get_json()
-    image_data = data["image"]
+    frames = data["frames"]        # multiple frames now
     subject = data["subject"]
     session_number = data["session"]
 
-    encoding = get_face_encoding(image_data)
+    # ---------------- LIVENESS CHECK ----------------
+    live_detected = False
+    encoding = None
+
+    for frame_data in frames:
+        image_data = frame_data.split(",")[1]
+        image_bytes = base64.b64decode(image_data)
+        np_arr = np.frombuffer(image_bytes, np.uint8)
+        frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+
+        # Check blink (liveness)
+        if detect_liveness(frame):
+            live_detected = True
+
+        # Also get encoding from one of the frames
+        if encoding is None:
+            rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            encodings = get_face_encoding(frame_data)
+            if encodings is not None:
+                encoding = encodings
+
+    if not live_detected:
+        return "Liveness check failed. Please blink."
 
     if encoding is None:
-        return "No face detected"
+        return "Face not detected properly."
 
+    # ---------------- FACE MATCHING ----------------
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
@@ -36,18 +62,15 @@ def mark_attendance():
     for student in students:
 
         if student["face_encoding"] is None:
-            continue  # skip invalid records
+            continue
 
         stored_encoding = np.frombuffer(student["face_encoding"], dtype=np.float64)
-
         match = np.linalg.norm(stored_encoding - encoding)
 
         if match < 0.6:
-
-            # Mark attendance
             now = datetime.now()
 
-            # Check if already marked
+            # Check duplicate
             cursor.execute("""
                 SELECT * FROM attendance
                 WHERE student_id = %s AND date = %s AND session = %s
@@ -60,15 +83,17 @@ def mark_attendance():
                 conn.close()
                 return f"Attendance already marked for {student['name']} (Session {session_number})"
 
+            # Insert attendance
             cursor.execute("""
                 INSERT INTO attendance (student_id, date, time, subject, status, session)
-                VALUES (%s, %s, %s, %s, %s, %s)""", (
-                    student["id"],
-                    now.date(),
-                    now.time(),
-                    subject,
-                    "Present",
-                    session_number
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (
+                student["id"],
+                now.date(),
+                now.time(),
+                subject,
+                "Present",
+                session_number
             ))
 
             conn.commit()

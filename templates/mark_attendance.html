@@ -37,37 +37,40 @@
 <canvas id="canvas" width="300" height="200" style="display:none;"></canvas>
 
 <script>
-    const video = document.getElementById('video');
-
-    navigator.mediaDevices.getUserMedia({ video: true })
-        .then(stream => {
-            video.srcObject = stream;
-        });
+    let frames = [];
 
     function capture() {
+        frames = [];
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
 
-        ctx.drawImage(video, 0, 0, 300, 200);
+        let count = 0;
 
-        const imageData = canvas.toDataURL('image/png');
+        let interval = setInterval(() => {
+            ctx.drawImage(video, 0, 0, 300, 200);
+            frames.push(canvas.toDataURL('image/png'));
+            count++;
 
-        const subject = document.getElementById('subject').value;
-        const session = document.getElementById('session').value;
+            if (count == 10) {
+                clearInterval(interval);
 
-        fetch('/mark_attendance', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                image: imageData,
-                subject: subject,
-                session: session
-            })
-        })
-        .then(res => res.text())
-        .then(data => alert(data));
+                const subject = document.getElementById('subject').value;
+                const session = document.getElementById('session').value;
+
+                fetch('/mark_attendance', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        frames: frames,
+                        subject: subject,
+                        session: session
+                    })
+                })
+                .then(res => res.text())
+                .then(data => alert(data));
+            }
+
+        }, 200);
     }
 </script>
 
