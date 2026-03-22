@@ -2,24 +2,25 @@
 <html>
 <head>
     <title>Mark Attendance</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
-<body>
+<body class="p-4">
 
 <h2>Mark Attendance</h2>
 
 <label>Subject:</label>
-<select id="subject">
+<select id="subject" class="form-control w-25">
     <option value="Math">Math</option>
     <option value="OS">OS</option>
     <option value="DBMS">DBMS</option>
     <option value="Python">Python</option>
 </select>
 
-<br><br>
+<br>
 
 <label>Session:</label>
-<select id="session">
+<select id="session" class="form-control w-25">
     <option value="1">Lecture 1</option>
     <option value="2">Lecture 2</option>
     <option value="3">Lecture 3</option>
@@ -30,13 +31,31 @@
 
 <br><br>
 
-<video id="video" width="300" height="200" autoplay></video><br><br>
+<!-- Camera Box -->
+<div>
+    <video id="video" width="400" height="300" autoplay style="border:2px solid black;"></video>
+</div>
 
-<button onclick="capture()">Mark Attendance</button>
+<br>
 
-<canvas id="canvas" width="300" height="200" style="display:none;"></canvas>
+<button onclick="capture()" class="btn btn-primary">Mark Attendance</button>
+
+<canvas id="canvas" width="400" height="300" style="display:none;"></canvas>
 
 <script>
+    const video = document.getElementById('video');
+
+    // Open Webcam
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(function(stream) {
+            video.srcObject = stream;
+        })
+        .catch(function(err) {
+            alert("Camera access denied or not working.");
+            console.log(err);
+        });
+
+    // Capture multiple frames for liveness
     let frames = [];
 
     function capture() {
@@ -47,7 +66,7 @@
         let count = 0;
 
         let interval = setInterval(() => {
-            ctx.drawImage(video, 0, 0, 300, 200);
+            ctx.drawImage(video, 0, 0, 400, 300);
             frames.push(canvas.toDataURL('image/png'));
             count++;
 
