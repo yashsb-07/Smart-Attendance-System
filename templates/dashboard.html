@@ -3,9 +3,10 @@
 <head>
     <title>Admin Dashboard</title>
 
+    <link rel="stylesheet" href="/static/css/style.css">
+
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css">
 
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -60,72 +61,65 @@
 
 <div class="content">
 
-    <h2>Dashboard</h2>
+    <h2 style="margin-bottom: 20px;">Dashboard</h2>
 
     <div class="row">
         <div class="col-md-3">
-            <div class="card bg-primary text-white">
-                <div class="card-body">
-                    <h5>Total Students</h5>
-                    <h3>{{ total_students }}</h3>
-                </div>
+            <div class="card card-blue">
+                <h5>Total Students</h5>
+                <h2>{{ total_students }}</h2>
             </div>
         </div>
 
         <div class="col-md-3">
-            <div class="card bg-success text-white">
-                <div class="card-body">
-                    <h5>Attendance Today</h5>
-                    <h3>{{ attendance_today }}</h3>
-                </div>
+            <div class="card card-green">
+                <h5>Attendance Today</h5>
+                <h2>{{ attendance_today }}</h2>
             </div>
         </div>
 
         <div class="col-md-3">
-            <div class="card bg-warning text-white">
-                <div class="card-body">
-                    <h5>Present Today</h5>
-                    <h3>{{ present_today }}</h3>
-                </div>
+            <div class="card card-orange">
+                <h5>Present Today</h5>
+                <h2>{{ present_today }}</h2>
             </div>
         </div>
 
         <div class="col-md-3">
-            <div class="card bg-danger text-white">
-                <div class="card-body">
-                    <h5>Attendance %</h5>
-                    <h3>{{ attendance_percentage }}%</h3>
-                </div>
+            <div class="card card-red">
+                <h5>Attendance %</h5>
+                <h2>{{ attendance_percentage }}%</h2>
             </div>
         </div>
     </div>
 
-    <canvas id="attendanceChart" width="400" height="150"></canvas>
+    <div class="card mt-4" style="background:white; color:black;">
+        <h4>Attendance Overview</h4>
+        <canvas id="attendanceChart"></canvas>
+    </div>
 
-    <h3 class="mt-4">Recent Attendance</h3>
+    <div class="card mt-4" style="background:white; color:black;">
+        <h4>Recent Attendance</h4>
+        <table class="table">
+            <tr>
+                <th>Name</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Subject</th>
+                <th>Session</th>
+            </tr>
 
-    <a href="/export_excel" class="btn btn-success">Export to Excel</a>
-    <a href="/export_pdf" class="btn btn-danger">Export to PDF</a>
-
-    <table class="table table-bordered">
-        <tr>
-            <th>Name</th>
-            <th>Date</th>
-            <th>Time</th>
-            <th>Subject</th>
-            <th>Session</th>
-        </tr>
-
-        {% for row in recent_attendance %}
-        <tr>
-            <td>{{ row.name }}</td>
-            <td>{{ row.date }}</td>
-            <td>{{ row.time }}</td>
-            <td>{{ row.subject }}</td>
-            <td>{{ row.session }}</td>
-        </tr>
-        {% endfor %}
-    </table>
+            {% for row in recent_attendance %}
+            <tr>
+                <td>{{ row.name }}</td>
+                <td>{{ row.date }}</td>
+                <td>{{ row.time }}</td>
+                <td>{{ row.subject }}</td>
+                <td>{{ row.session }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
 
 </div>
 
@@ -155,6 +149,10 @@
         }
     });
 </script>
+
+<footer style="margin-left:260px; padding:15px; background:#1f2937; color:white; text-align:center;">
+    Smart Attendance System © 2026
+</footer>
 
 </body>
 </html>
