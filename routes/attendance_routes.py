@@ -1,9 +1,13 @@
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table
 from flask import Blueprint, render_template, request, send_file
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.pagesizes import letter
 from database.db import get_db_connection
 from utils.face_utils import get_face_encoding
 import numpy as np
 from datetime import datetime
 import pandas as pd
+import os
 
 attendance_bp = Blueprint("attendance", __name__)
 
@@ -97,6 +101,55 @@ def export_excel():
     df.to_excel(file_path, index=False)
 
     conn.close()
+
+    return send_file(file_path, as_attachment=True)
+
+@attendance_bp.route("/export_pdf")
+def export_pdf():
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT students.name, students.roll_number, attendance.date, attendance.time,
+               attendance.subject, attendance.session, attendance.status
+        FROM attendance
+        JOIN students ON attendance.student_id = students.id
+    """)
+
+    data = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    file_path = "attendance_report.pdf"
+
+    styles = getSampleStyleSheet()
+    pdf = SimpleDocTemplate(file_path, pagesize=letter)
+
+    elements = []
+
+    title = Paragraph("Attendance Report", styles['Title'])
+    elements.append(title)
+    elements.append(Spacer(1, 20))
+
+    table_data = [["Name", "Roll", "Date", "Time", "Subject", "Session", "Status"]]
+
+    for row in data:
+        table_data.append([
+            row["name"],
+            row["roll_number"],
+            str(row["date"]),
+            str(row["time"]),
+            row["subject"],
+            row["session"],
+            row["status"]
+        ])
+
+    table = Table(table_data)
+    elements.append(table)
+
+    pdf.build(elements)
 
     return send_file(file_path, as_attachment=True)
 
