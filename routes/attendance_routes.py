@@ -134,3 +134,52 @@ def attendance_report():
     conn.close()
 
     return render_template("attendance_report.html", report=data)
+
+@attendance_bp.route("/search_student", methods=["GET", "POST"])
+def search_student():
+
+    if request.method == "GET":
+        return render_template("search_student.html")
+
+    roll_number = request.form["roll_number"]
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    # Get student
+    cursor.execute("SELECT * FROM students WHERE roll_number = %s", (roll_number,))
+    student = cursor.fetchone()
+
+    if not student:
+        cursor.close()
+        conn.close()
+        return "Student not found"
+
+    # Get attendance
+    cursor.execute("""
+        SELECT date, time, subject, session, status
+        FROM attendance
+        WHERE student_id = %s
+    """, (student["id"],))
+
+    attendance = cursor.fetchall()
+
+    # Total present
+    total_present = len(attendance)
+
+    # Total sessions
+    cursor.execute("SELECT COUNT(DISTINCT date, session) as total FROM attendance")
+    total_sessions = cursor.fetchone()["total"]
+
+    if total_sessions == 0:
+        percentage = 0
+    else:
+        percentage = int((total_present / total_sessions) * 100)
+
+    cursor.close()
+    conn.close()
+
+    return render_template("search_student.html",
+                           student=student,
+                           attendance=attendance,
+                           percentage=percentage)
