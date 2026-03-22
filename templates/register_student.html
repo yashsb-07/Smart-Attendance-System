@@ -32,6 +32,18 @@
 
 <h2>Student Registration</h2>
 
+{% if message %}
+<div class="alert alert-success">
+    {{ message }}
+</div>
+
+<script>
+    setTimeout(function(){
+        window.location.href = "/register_student";
+    }, 2000); // Refresh after 2 seconds
+</script>
+{% endif %}
+
 <form method="POST" action="/register_student">
 
     <label>Name:</label><br>
@@ -59,7 +71,7 @@
 
     <input type="hidden" name="image_data" id="image_data">
 
-    <button type="submit">Register</button>
+    <button type="submit" class="btn btn-primary">Register & Capture Face</button>
 
 </form>
 

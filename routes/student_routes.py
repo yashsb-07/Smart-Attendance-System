@@ -46,4 +46,4 @@ def register_student():
     cursor.close()
     conn.close()
 
-    return "Student Registered Successfully with Face Encoding"
+    return render_template("register_student.html", message="Student Registered Successfully!")
