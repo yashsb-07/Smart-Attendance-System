@@ -1,8 +1,9 @@
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, send_file
 from database.db import get_db_connection
 from utils.face_utils import get_face_encoding
 import numpy as np
 from datetime import datetime
+import pandas as pd
 
 attendance_bp = Blueprint("attendance", __name__)
 
@@ -77,3 +78,24 @@ def mark_attendance():
     conn.close()
 
     return "Face not recognized"
+
+@attendance_bp.route("/export_excel")
+def export_excel():
+
+    conn = get_db_connection()
+
+    query = """
+        SELECT students.name, students.roll_number, attendance.date, attendance.time,
+               attendance.subject, attendance.session, attendance.status
+        FROM attendance
+        JOIN students ON attendance.student_id = students.id
+    """
+
+    df = pd.read_sql(query, conn)
+
+    file_path = "attendance.xlsx"
+    df.to_excel(file_path, index=False)
+
+    conn.close()
+
+    return send_file(file_path, as_attachment=True)
