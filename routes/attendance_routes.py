@@ -1,6 +1,6 @@
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table
 from flask import Blueprint, render_template, request, send_file
-from face_recognition.liveness_detection import detect_liveness
+from face_recog.liveness_detection import detect_liveness
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.pagesizes import letter
 from database.db import get_db_connection
