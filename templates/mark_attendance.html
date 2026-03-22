@@ -40,22 +40,18 @@
 
 <button onclick="capture()" class="btn btn-primary">Mark Attendance</button>
 
+<div id="resultBox" class="mt-3"></div>
+
 <canvas id="canvas" width="400" height="300" style="display:none;"></canvas>
 
 <script>
     const video = document.getElementById('video');
 
-    // Open Webcam
     navigator.mediaDevices.getUserMedia({ video: true })
         .then(function(stream) {
             video.srcObject = stream;
-        })
-        .catch(function(err) {
-            alert("Camera access denied or not working.");
-            console.log(err);
         });
 
-    // Capture multiple frames for liveness
     let frames = [];
 
     function capture() {
@@ -86,7 +82,19 @@
                     })
                 })
                 .then(res => res.text())
-                .then(data => alert(data));
+                .then(data => {
+                    const resultBox = document.getElementById("resultBox");
+
+                    if (data.includes("Attendance Marked")) {
+                        resultBox.innerHTML = `<div class="alert alert-success">${data}</div>`;
+                    } 
+                    else if (data.includes("already marked")) {
+                        resultBox.innerHTML = `<div class="alert alert-warning">${data}</div>`;
+                    }
+                    else {
+                        resultBox.innerHTML = `<div class="alert alert-danger">${data}</div>`;
+                    }
+                });
             }
 
         }, 200);
