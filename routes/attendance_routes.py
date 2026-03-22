@@ -99,3 +99,38 @@ def export_excel():
     conn.close()
 
     return send_file(file_path, as_attachment=True)
+
+@attendance_bp.route("/attendance_report")
+def attendance_report():
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    query = """
+        SELECT 
+            students.name,
+            students.roll_number,
+            COUNT(attendance.id) as total_present,
+            (
+                SELECT COUNT(DISTINCT date, session) 
+                FROM attendance
+            ) as total_sessions
+        FROM students
+        LEFT JOIN attendance ON students.id = attendance.student_id
+        GROUP BY students.id
+    """
+
+    cursor.execute(query)
+    data = cursor.fetchall()
+
+    # Calculate percentage
+    for row in data:
+        if row["total_sessions"] == 0:
+            row["percentage"] = 0
+        else:
+            row["percentage"] = int((row["total_present"] / row["total_sessions"]) * 100)
+
+    cursor.close()
+    conn.close()
+
+    return render_template("attendance_report.html", report=data)
