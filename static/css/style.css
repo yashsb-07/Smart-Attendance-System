@@ -310,3 +310,47 @@
 .toggle-btn:hover {
     background: #374151;
 }
+
+/* Dark Mode */
+.dark-mode {
+    background: #0f172a;
+    color: white;
+}
+
+.dark-mode .white-card {
+    background: #1e293b;
+    color: white;
+}
+
+.dark-mode .table {
+    background: #1e293b;
+    color: white;
+}
+
+.dark-mode .sidebar {
+    background: #020617;
+}
+
+.dark-mode .footer {
+    background: #020617;
+}
+
+/* Dark mode button */
+.mode-btn {
+    margin-left: auto;
+    background: #111827;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    transition: 0.3s;
+}
+
+.mode-btn:hover {
+    background: #374151;
+}
+
+/* Profile card*/ 
+.profile-card {
+    max-width: 300px;
+}

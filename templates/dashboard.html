@@ -32,6 +32,15 @@
     <div class="top-bar">
         <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
         <h2 class="page-title">Dashboard</h2>
+
+        <button class="mode-btn" onclick="toggleMode()">🌙</button>
+    </div>
+
+    <div class="white-card profile-card">
+        <h5>Admin Profile</h5>
+        <p><strong>Name:</strong> {{ admin_name }}</p>
+        <p><strong>Role:</strong> Administrator</p>
+        <p><strong>System:</strong> Smart Attendance</p>
     </div>
 
     <div class="white-card">
@@ -87,7 +96,11 @@
 
     <!-- Table -->
     <div class="white-card">
-        <h4>Recent Attendance</h4>
+         <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h4>Recent Attendance</h4>
+            <input type="text" id="searchInput" placeholder="Search student..." class="form-control" style="width:250px;">
+        </div>
+
         <table class="table">
             <tr>
                 <th>Name</th>
@@ -201,6 +214,23 @@
         document.querySelector(".content").classList.toggle("collapsed");
         document.querySelector(".footer").classList.toggle("collapsed");
     }
+
+    // ================= DARK MODE =================
+    function toggleMode() {
+        document.body.classList.toggle("dark-mode");
+    }
+
+    // ================= SEARCH =================
+    document.getElementById("searchInput").addEventListener("keyup", function() {
+        let filter = this.value.toLowerCase();
+        let rows = document.querySelectorAll("table tr");
+
+        rows.forEach((row, index) => {
+            if (index === 0) return;
+            let text = row.innerText.toLowerCase();
+            row.style.display = text.includes(filter) ? "" : "none";
+        });
+    });
 
 </script>
 
