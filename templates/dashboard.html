@@ -7,98 +7,86 @@
 
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <!-- <style>
-        body {
-            display: flex;
-        }
-        
-        .sidebar {
-            width: 240px;
-            height: 100vh;
-            background: #1f2937;
-        }
-
-        .sidebar a {
-            display: block;
-            color: #cbd5e1;
-            padding: 10px;
-            text-decoration: none;
-            border-radius: 5px;
-        }
-
-        .sidebar a:hover {
-            background: #374151;
-            color: white;
-        }
-
-        .content {
-            flex: 1;
-            padding: 20px;
-        }
-        .card {
-            margin-bottom: 20px;
-        }
-    </style> -->
-
 </head>
 
 <body>
 
 <div class="sidebar">
     <h4>Smart Attendance</h4>
-    <a href="/dashboard">Dashboard</a>
-    <a href="/register_student">Register Student</a>
-    <a href="/mark_attendance">Mark Attendance</a>
-    <a href="/attendance_report">Attendance Report</a>
-    <a href="/search_student">Search Student</a>
-    <a href="/logout">Logout</a>
+
+    <a href="/dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <a href="/register_student"><i class="bi bi-person-plus"></i> Register Student</a>
+    <a href="/mark_attendance"><i class="bi bi-camera"></i> Mark Attendance</a>
+    <a href="/attendance_report"><i class="bi bi-bar-chart"></i> Attendance Report</a>
+    <a href="/search_student"><i class="bi bi-search"></i> Search Student</a>
+    <a href="/logout"><i class="bi bi-box-arrow-right"></i> Logout</a>
 </div>
 
 <div class="content">
 
-    <h2 style="margin-bottom: 20px;">Dashboard</h2>
+    <div class="top-bar">
+        <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+        <h2 class="page-title">Dashboard</h2>
+    </div>
+
+    <div class="white-card">
+        <h4>Welcome, {{ admin_name }} 👋</h4>
+        <p>Here is today's attendance summary.</p>
+    </div>
+
+    <div class="white-card">
+        <h5>Current Date & Time</h5>
+        <h3 id="clock"></h3>
+    </div>
 
     <div class="row">
-        <div class="col-md-3">
+        <div class="col-md-3 col-sm-6 mb-3">
             <div class="card card-blue">
                 <h5>Total Students</h5>
-                <h2>{{ total_students }}</h2>
+                <h2 id="totalStudents">0</h2>
             </div>
         </div>
 
-        <div class="col-md-3">
+        <div class="col-md-3 col-sm-6 mb-3">
             <div class="card card-green">
                 <h5>Attendance Today</h5>
-                <h2>{{ attendance_today }}</h2>
+                <h2 id="attendanceToday">0</h2>
             </div>
         </div>
 
-        <div class="col-md-3">
+        <div class="col-md-3 col-sm-6 mb-3">
             <div class="card card-orange">
                 <h5>Present Today</h5>
-                <h2>{{ present_today }}</h2>
+                <h2 id="presentToday">0</h2>
             </div>
         </div>
 
-        <div class="col-md-3">
+        <div class="col-md-3 col-sm-6 mb-3">
             <div class="card card-red">
                 <h5>Attendance %</h5>
-                <h2>{{ attendance_percentage }}%</h2>
+                <h2 id="attendancePercent">0</h2>
             </div>
         </div>
     </div>
 
-    <div class="card mt-4" style="background:white; color:black;">
+    <!-- Chart -->
+    <div class="white-card">
         <h4>Attendance Overview</h4>
         <canvas id="attendanceChart"></canvas>
     </div>
 
-    <div class="card mt-4" style="background:white; color:black;">
+    <div class="white-card">
+        <h4>Attendance Distribution</h4>
+        <canvas id="pieChart"></canvas>
+    </div>
+
+    <!-- Table -->
+    <div class="white-card">
         <h4>Recent Attendance</h4>
         <table class="table">
             <tr>
@@ -123,11 +111,13 @@
 
 </div>
 
+<!-- Chart Script -->
 <script>
+    // ================= Bar CHART =================
     const ctx = document.getElementById('attendanceChart').getContext('2d');
 
-    const present = Number("{{ present_today }}");
-    const absent = Number("{{ absent_today }}");
+    const present = parseInt("{{ present_today }}");
+    const absent = parseInt("{{ absent_today }}");
 
     new Chart(ctx, {
         type: 'bar',
@@ -136,7 +126,7 @@
             datasets: [{
                 label: 'Attendance',
                 data: [present, absent],
-                backgroundColor: ['green', 'red']
+                backgroundColor: ['#10b981', '#ef4444']
             }]
         },
         options: {
@@ -148,9 +138,73 @@
             }
         }
     });
+
+    // ================= PIE CHART =================
+    const pieCtx = document.getElementById('pieChart').getContext('2d');
+
+    new Chart(pieCtx, {
+        type: 'pie',
+        data: {
+            labels: ['Present', 'Absent'],
+            datasets: [{
+                data: [present, absent],
+                backgroundColor: ['#10b981', '#ef4444']
+            }]
+        }
+    });
+
+    // ================= LIVE CLOCK =================
+    function updateClock() {
+        const now = new Date();
+        const date = now.toLocaleDateString();
+        const time = now.toLocaleTimeString();
+        document.getElementById("clock").innerHTML = date + " | " + time;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // ================= ANIMATED COUNTERS =================
+    function animateValue(id, start, end, duration) {
+        if (end == 0) {
+            document.getElementById(id).innerHTML = 0;
+            return;
+        }
+
+        let range = end - start;
+        let current = start;
+        let increment = end > start ? 1 : -1;
+        let stepTime = Math.abs(Math.floor(duration / range));
+        let obj = document.getElementById(id);
+
+        let timer = setInterval(function() {
+            current += increment;
+            obj.innerHTML = current;
+            if (current == end) {
+                clearInterval(timer);
+            }
+        }, stepTime);
+    }
+
+    const totalStudents = parseInt("{{ total_students }}");
+    const attendanceToday = parseInt("{{ attendance_today }}");
+    const presentToday = parseInt("{{ present_today }}");
+    const attendancePercent = parseInt("{{ attendance_percentage }}");
+
+    animateValue("totalStudents", 0, totalStudents, 1000);
+    animateValue("attendanceToday", 0, attendanceToday, 1000);
+    animateValue("presentToday", 0, presentToday, 1000);
+    animateValue("attendancePercent", 0, attendancePercent, 1000);
+
+    // ================= SIDEBAR TOGGLE =================
+    function toggleSidebar() {
+        document.querySelector(".sidebar").classList.toggle("collapsed");
+        document.querySelector(".content").classList.toggle("collapsed");
+        document.querySelector(".footer").classList.toggle("collapsed");
+    }
+
 </script>
 
-<footer style="margin-left:260px; padding:15px; background:#1f2937; color:white; text-align:center;">
+<footer class="footer">
     Smart Attendance System © 2026
 </footer>
 

@@ -81,9 +81,9 @@ def dashboard():
     conn.close()
 
     return render_template("dashboard.html",
-                           total_students=total_students,
-                           attendance_today=attendance_today,
-                           present_today=present_today,
-                           absent_today=absent_today,  # ✅ SEND THIS
-                           attendance_percentage=attendance_percentage,
-                           recent_attendance=recent_attendance)
+                       total_students=total_students,
+                       attendance_today=attendance_today,
+                       present_today=present_today,
+                       attendance_percentage=attendance_percentage,
+                       recent_attendance=recent_attendance,
+                       admin_name="Admin")
