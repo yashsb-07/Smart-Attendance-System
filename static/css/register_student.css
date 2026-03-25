@@ -30,6 +30,7 @@ body {
     margin: 0;
     color: #38bdf8;
     letter-spacing: 2px;
+    font-weight: 600;
 }
 
 /* Footer */
@@ -45,7 +46,7 @@ body {
 /* Main Container */
 .main-container {
     margin-top: 30px;
-    max-width: 1400px;
+    max-width: 1200px;
 }
 
 /* Cards */
@@ -53,8 +54,16 @@ body {
     background: #1e293b;
     border: 1px solid #334155;
     border-radius: 15px;
-    padding: 20px;
+    padding: 25px;
     box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    min-height: 520px;
+}
+
+/* Card hover effect */
+.form-card:hover, .camera-card:hover {
+    border-color: #38bdf8;
+    box-shadow: 0 0 25px rgba(56,189,248,0.15);
+    transition: 0.3s;
 }
 
 /* Card Titles */
@@ -68,6 +77,8 @@ body {
     background: #0f172a;
     border: 1px solid #334155;
     color: white;
+    height: 45px;
+    border-radius: 8px;
 }
 
 .form-control:focus {
@@ -82,10 +93,11 @@ body {
     background: transparent;
     border: 2px solid #38bdf8;
     color: #38bdf8;
-    padding: 12px;
-    font-size: 18px;
+    height: 45px;
+    font-size: 16px;
     border-radius: 10px;
     transition: 0.3s;
+    font-weight: 600;
 }
 
 .register-btn:hover {
@@ -100,6 +112,8 @@ body {
     border-radius: 10px;
     overflow: hidden;
     border: 2px solid #38bdf8;
+    width: 100%;
+    max-width: 640px;
 }
 
 #video {
@@ -144,26 +158,37 @@ body {
     100% { box-shadow: 0 0 0px rgba(56,189,248,0.3); }
 }
 
-/* Status Text */
+/* Status Box */
+.status-box {
+    margin-top: 10px;
+    text-align: center;
+}
+
 .face-status {
     font-weight: bold;
-    margin-top: 10px;
-    font-size: 18px;
+    font-size: 20px;
+    color: #22c55e;
+    margin-bottom: 5px;
 }
 
 .instruction-text {
-    font-size: 15px;
+    font-size: 14px;
     color: #94a3b8;
 }
 
 /* Progress Ring */
 .progress-ring {
-    text-align: center;
+    position: relative;
+    width: 140px;
+    height: 140px;
     margin-top: 10px;
 }
 
 #progressText {
-    margin-top: -95px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     font-weight: bold;
     color: #22c55e;
 }
@@ -260,8 +285,8 @@ body {
 }
 
 /* Responsive */
-@media (max-width: 768px) {
+@media (max-width: 992px) {
     .main-container {
-        padding: 10px;
+        max-width: 95%;
     }
 }

@@ -11,6 +11,7 @@ let autoCaptured = false;
 let blinkDetected = false;
 let progress = 0;
 let faceDetectedOnce = false;
+let lastSpokenTime = 0;
 
 // ================= CAMERA =================
 navigator.mediaDevices.getUserMedia({ video: true })
@@ -54,18 +55,29 @@ function checkAlignment(landmarks) {
     return "Aligned";
 }
 
-// ================= PROGRESS RING =================
+// ================= PROGRESS =================
 function updateProgress() {
     if (progress >= 100) return;
 
-    progress += 2;
+    progress += 1.5;
     const offset = 377 - (377 * progress) / 100;
     progressCircle.style.strokeDashoffset = offset;
-    progressText.innerText = progress + "%";
+    progressText.innerText = Math.floor(progress) + "%";
 }
 
-// ================= VOICE =================
+function resetProgress() {
+    progress = 0;
+    progressCircle.style.strokeDashoffset = 377;
+    progressText.innerText = "0%";
+}
+
+// ================= VOICE (Cooldown) =================
 function speak(text) {
+    const now = Date.now();
+    if (now - lastSpokenTime < 3000) return;
+
+    lastSpokenTime = now;
+
     if ('speechSynthesis' in window) {
         const speech = new SpeechSynthesisUtterance(text);
         speech.lang = "en-US";
@@ -108,27 +120,38 @@ function startFaceDetection() {
             const alignment = checkAlignment(landmarks);
             instructionText.innerText = alignment;
 
-            updateProgress();
+            // Progress only when aligned
+            if (alignment === "Aligned") {
+                updateProgress();
+            } else {
+                resetProgress();
+            }
 
-            if (isBlinking(landmarks)) {
+            // Blink detection
+            if (isBlinking(landmarks) && !blinkDetected) {
                 blinkDetected = true;
                 instructionText.innerText = "Blink Detected";
                 speak("Blink detected");
             }
 
+            // Capture
             if (alignment === "Aligned" && blinkDetected && progress >= 100 && !autoCaptured) {
                 autoCaptured = true;
                 instructionText.innerText = "Capturing...";
                 speak("Capturing image");
-                captureImage();
+
+                setTimeout(() => {
+                    captureImage();
+                }, 800);
             }
 
         } else {
             faceStatus.innerText = "No Face Detected";
             instructionText.innerText = "Align your face";
-            progress = 0;
             faceDetectedOnce = false;
             blinkDetected = false;
+            autoCaptured = false;
+            resetProgress();
         }
 
         requestAnimationFrame(detect);
@@ -150,7 +173,6 @@ function captureImage() {
     document.getElementById('image_data').value = imageData;
 
     document.getElementById('captureSound').play();
-
     progressText.innerText = "Captured";
 }
 
@@ -179,7 +201,7 @@ particleCanvas.height = window.innerHeight;
 
 let particlesArray = [];
 
-for (let i = 0; i < 70; i++) {
+for (let i = 0; i < 60; i++) {
     particlesArray.push({
         x: Math.random() * particleCanvas.width,
         y: Math.random() * particleCanvas.height,
