@@ -4,29 +4,24 @@ import cv2
 import face_recognition
 
 def get_face_encoding(image_data):
+    try:
+        if "," in image_data:
+            image_data = image_data.split(",")[1]
+        else:
+            return None
 
-    # Remove header (data:image/png;base64,...)
-    image_data = image_data.split(",")[1]
+        image_bytes = base64.b64decode(image_data)
+        np_arr = np.frombuffer(image_bytes, np.uint8)
+        img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
-    # Decode base64
-    image_bytes = base64.b64decode(image_data)
+        face_locations = face_recognition.face_locations(img)
 
-    # Convert to numpy array
-    np_arr = np.frombuffer(image_bytes, np.uint8)
+        if len(face_locations) == 0:
+            return None
 
-    # Decode image
-    img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+        encoding = face_recognition.face_encodings(img, face_locations)[0]
+        return encoding
 
-    # Convert BGR to RGB
-    rgb_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
-    # Detect face
-    faces = face_recognition.face_locations(rgb_img)
-
-    if len(faces) == 0:
+    except Exception as e:
+        print("Error in face encoding:", e)
         return None
-
-    # Get encoding
-    encoding = face_recognition.face_encodings(rgb_img, faces)[0]
-
-    return encoding

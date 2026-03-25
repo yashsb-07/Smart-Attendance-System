@@ -1,102 +1,145 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Register Student</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Face Registration</title>
 
-    <style>
-        .camera-box {
-            border: 3px solid #0d6efd;
-            padding: 10px;
-            display: inline-block;
-            border-radius: 10px;
-        }
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-        .scan-line {
-            width: 100%;
-            height: 2px;
-            background: red;
-            position: relative;
-            animation: scan 2s infinite;
-        }
-
-        @keyframes scan {
-            0% { top: 0; }
-            50% { top: 180px; }
-            100% { top: 0; }
-        }
-    </style>
-
+    <!-- External CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/register_student.css') }}">
 </head>
-
 <body>
 
-<h2>Student Registration</h2>
+<!-- Particle Background -->
+<canvas id="particles"></canvas>
 
-{% if message %}
-<div class="alert alert-success">
-    {{ message }}
+<!-- Header -->
+<div class="header">
+    <h2>AI FACE REGISTRATION SYSTEM</h2>
 </div>
 
-<script>
-    setTimeout(function(){
-        window.location.href = "/register_student";
-    }, 2000); // Refresh after 2 seconds
-</script>
-{% endif %}
+<!-- Main Container -->
+<div class="container main-container">
+    <div class="row g-4 align-items-stretch">
 
-<form method="POST" action="/register_student">
+        <!-- Left: Registration Form -->
+        <div class="col-lg-5">
+            <div class="card form-card h-100">
+                <div class="card-body">
+                    <h4 class="card-title text-center mb-4">Student Registration</h4>
 
-    <label>Name:</label><br>
-    <input type="text" name="name" required><br><br>
+                    {% if message %}
+                    <div class="success-message">{{ message }}</div>
+                    {% endif %}
 
-    <label>Roll Number:</label><br>
-    <input type="text" name="roll_number" required><br><br>
+                    {% if error %}
+                    <div class="error-message">{{ error }}</div>
+                    {% endif %}
 
-    <label>Department:</label><br>
-    <input type="text" name="department"><br><br>
+                    <form method="POST" action="/register_student" id="registerForm">
+                        <input type="text" name="name" class="form-control mb-3" placeholder="Full Name" required>
+                        <input type="text" name="roll_number" class="form-control mb-3" placeholder="Roll Number" required>
 
-    <label>Class:</label><br>
-    <input type="text" name="class"><br><br>
+                        <select name="department" class="form-control mb-3" required>
+                            <option value="">Select Department</option>
+                            <option>Computer Engineering</option>
+                            <option>Information Technology</option>
+                            <option>ENTC</option>
+                            <option>Mechanical</option>
+                            <option>Civil</option>
+                        </select>
 
-    <label>Semester:</label><br>
-    <input type="text" name="semester"><br><br>
+                        <select name="class" class="form-control mb-3" required>
+                            <option value="">Select Class</option>
+                            <option>FY</option>
+                            <option>SY</option>
+                            <option>TY</option>
+                            <option>BE</option>
+                        </select>
 
-    <!-- Camera -->
-    <h3>Capture Face</h3>
+                        <select name="semester" class="form-control mb-3" required>
+                            <option value="">Select Semester</option>
+                            <option>1</option><option>2</option><option>3</option><option>4</option>
+                            <option>5</option><option>6</option><option>7</option><option>8</option>
+                        </select>
 
-    <video id="video" width="300" height="200" autoplay></video><br><br>
-    <button type="button" onclick="captureImage()">Capture</button><br><br>
+                        <input type="hidden" name="image_data" id="image_data">
 
-    <canvas id="canvas" width="300" height="200" style="display:none;"></canvas>
+                        <button type="submit" class="btn register-btn w-100">
+                            Register Student
+                        </button>
+                    </form>
 
-    <input type="hidden" name="image_data" id="image_data">
+                    <!-- Loader -->
+                    <div id="loader" class="loader mt-4" style="display:none;"></div>
+                </div>
+            </div>
+        </div>
 
-    <button type="submit" class="btn btn-primary">Register & Capture Face</button>
+        <!-- Right: Camera Section -->
+        <div class="col-lg-7">
+            <div class="card camera-card h-100 text-center">
+                <div class="card-body">
+                    <h4 class="card-title mb-3">AI Face Capture</h4>
 
-</form>
+                    <div class="camera-box">
+                        <video id="video" autoplay muted></video>
+                        <canvas id="faceCanvas"></canvas>
+                        <div class="scan-line"></div>
+                        <div class="radar"></div>
+                    </div>
 
-<script>
-    const video = document.getElementById('video');
+                    <p id="faceStatus" class="face-status mt-3">No Face Detected</p>
+                    <p id="instructionText" class="instruction-text">Align your face</p>
 
-    // Access webcam
-    navigator.mediaDevices.getUserMedia({ video: true })
-        .then(stream => {
-            video.srcObject = stream;
-        });
+                    <!-- Progress Ring -->
+                    <div class="progress-ring mt-3">
+                        <svg width="140" height="140">
+                            <circle cx="70" cy="70" r="60" stroke="#334155" stroke-width="8" fill="none"/>
+                            <circle id="progressCircle" cx="70" cy="70" r="60"
+                                stroke="#22c55e" stroke-width="8" fill="none"
+                                stroke-dasharray="377"
+                                stroke-dashoffset="377"/>
+                        </svg>
+                        <p id="progressText">0%</p>
+                    </div>
 
-    function captureImage() {
-        const canvas = document.getElementById('canvas');
-        const context = canvas.getContext('2d');
+                    <canvas id="canvas" style="display:none;"></canvas>
+                </div>
+            </div>
+        </div>
 
-        context.drawImage(video, 0, 0, 300, 200);
+    </div>
+</div>
 
-        const imageData = canvas.toDataURL('image/png');
+<!-- Success Animation Overlay -->
+<div id="successAnimation" class="success-overlay" style="display:none;">
+    <div class="success-box">
+        <div class="checkmark-circle">
+            <div class="checkmark"></div>
+        </div>
+        <p>Registration Successful</p>
+    </div>
+</div>
 
-        document.getElementById('image_data').value = imageData;
+<!-- Footer -->
+<div class="footer">
+    Smart Attendance System © 2026
+</div>
 
-        alert("Image Captured!");
-    }
-</script>
+<!-- Sounds -->
+<audio id="successSound" src="{{ url_for('static', filename='sounds/success.mp3') }}"></audio>
+<audio id="errorSound" src="{{ url_for('static', filename='sounds/error.mp3') }}"></audio>
+<audio id="captureSound" src="{{ url_for('static', filename='sounds/capture.mp3') }}"></audio>
+
+<!-- face-api -->
+<script defer src="https://unpkg.com/face-api.js@0.22.2/dist/face-api.min.js"></script>
+
+<!-- External JS -->
+<script defer src="{{ url_for('static', filename='js/register_student.js') }}"></script>
 
 </body>
 </html>
