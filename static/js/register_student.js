@@ -12,6 +12,10 @@ let blinkDetected = false;
 let progress = 0;
 let faceDetectedOnce = false;
 let lastSpokenTime = 0;
+let noFaceSpoken = false;
+
+let scanStartTime = null;
+let MAX_SCAN_TIME = 5000; // 5 seconds
 
 // ================= CAMERA =================
 navigator.mediaDevices.getUserMedia({ video: true })
@@ -41,7 +45,7 @@ function isBlinking(landmarks) {
         return Math.abs(eye[1].y - eye[5].y);
     }
 
-    return eyeHeight(leftEye) < 4 && eyeHeight(rightEye) < 4;
+    return eyeHeight(leftEye) < 6 && eyeHeight(rightEye) < 6;
 }
 
 // ================= FACE ALIGNMENT =================
@@ -57,12 +61,16 @@ function checkAlignment(landmarks) {
 
 // ================= PROGRESS =================
 function updateProgress() {
-    if (progress >= 100) return;
+    if (!scanStartTime) return;
 
-    progress += 1.5;
-    const offset = 377 - (377 * progress) / 100;
+    let elapsed = Date.now() - scanStartTime;
+    let percent = Math.min((elapsed / MAX_SCAN_TIME) * 100, 100);
+
+    const offset = 377 - (377 * percent) / 100;
     progressCircle.style.strokeDashoffset = offset;
-    progressText.innerText = Math.floor(progress) + "%";
+    progressText.innerText = Math.floor(percent) + "%";
+
+    progress = percent;
 }
 
 function resetProgress() {
@@ -109,6 +117,8 @@ function startFaceDetection() {
 
         if (detections.length > 0) {
 
+            noFaceSpoken = false;   // ===== THIS IS THE STEP 3 FIX =====
+
             if (!faceDetectedOnce) {
                 speak("Face detected");
                 faceDetectedOnce = true;
@@ -118,40 +128,71 @@ function startFaceDetection() {
 
             const landmarks = detections[0].landmarks;
             const alignment = checkAlignment(landmarks);
-            instructionText.innerText = alignment;
+            
+            if (progress < 80) {
+                instructionText.innerText = "Hold still...";
+            } else if (!blinkDetected) {
+                instructionText.innerText = "Please blink";
+            } else {
+                instructionText.innerText = "Capturing...";
+            }
 
             // Progress only when aligned
             if (alignment === "Aligned") {
+
+                if (!scanStartTime) {
+                    scanStartTime = Date.now();
+                }
+
                 updateProgress();
+
             } else {
                 resetProgress();
+                scanStartTime = null;
             }
 
             // Blink detection
             if (isBlinking(landmarks) && !blinkDetected) {
                 blinkDetected = true;
-                instructionText.innerText = "Blink Detected";
+                instructionText.innerText = "Blink Detected ✓";
                 speak("Blink detected");
+                console.log("Blink detected");
             }
 
             // Capture
-            if (alignment === "Aligned" && blinkDetected && progress >= 100 && !autoCaptured) {
-                autoCaptured = true;
+            if (blinkDetected && progress >= 100 && !autoCaptured) {
+                console.log("All conditions met - Capturing");
                 instructionText.innerText = "Capturing...";
                 speak("Capturing image");
+
+                autoCaptured = true;
 
                 setTimeout(() => {
                     captureImage();
                 }, 800);
+            } else {
+                console.log("Conditions:",
+                    "Aligned:", alignment,
+                    "Blink:", blinkDetected,
+                    "Progress:", progress,
+                    "Captured:", autoCaptured
+                );
             }
 
-        } else {
+       } else {
             faceStatus.innerText = "No Face Detected";
             instructionText.innerText = "Align your face";
+
+            if (!noFaceSpoken) {
+                speak("No face detected");
+                noFaceSpoken = true;
+            }
+
             faceDetectedOnce = false;
             blinkDetected = false;
             autoCaptured = false;
             resetProgress();
+            scanStartTime = null;
         }
 
         requestAnimationFrame(detect);
@@ -169,7 +210,7 @@ function captureImage() {
 
     context.drawImage(video, 0, 0);
 
-    const imageData = hiddenCanvas.toDataURL('image/jpeg', 0.7);
+    const imageData = hiddenCanvas.toDataURL('image/jpeg', 0.5);
     document.getElementById('image_data').value = imageData;
 
     document.getElementById('captureSound').play();
@@ -179,6 +220,10 @@ function captureImage() {
 // ================= FORM SUBMIT =================
 document.getElementById("registerForm").addEventListener("submit", function() {
     loader.style.display = "block";
+
+    setTimeout(() => {
+        loader.style.display = "none";
+    }, 5000);
 });
 
 // ================= SUCCESS OVERLAY =================
