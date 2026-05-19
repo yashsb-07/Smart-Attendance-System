@@ -1,3 +1,73 @@
+# Smart-Attendance-System
+
+A Smart Attendance System built using Python, Flask, Face Recognition, and MySQL to automate student attendance tracking.
+
+## 📌 Overview
+
+This project uses face recognition technology to detect and identify students automatically and mark their attendance in real time.
+
+The system helps reduce manual attendance work and improves accuracy in classrooms or institutions.
+
+---
+
+## 🚀 Features
+
+- 🎯 Face Registration System
+- 📸 Real-Time Face Detection & Recognition
+- ✅ Automatic Attendance Marking
+- 📊 Attendance Report Generation
+- 🗂️ Student Management
+- 📄 Export Attendance Reports
+- 🔊 Voice Notification Support
+- 🖥️ Simple Dashboard UI
+
+---
+
+## 🛠️ Technologies Used
+
+- Python
+- Flask
+- OpenCV
+- face_recognition
+- MySQL
+- HTML/CSS/JavaScript
+
+---
+
+## 📁 Project Structure
+
+```bash
+Smart-Attendance-System/
+│
+├── static/
+│   ├── css/
+│   └── js/
+│
+├── templates/
+├── routes/
+├── models/
+├── utils/
+├── sounds/
+│
+├── app.py
+├── config.py
+├── attendance.xlsx
+├── attendance_report.pdf
+└── README.md
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 -- To create db use this: --
 
 1. CREATE DATABASE smart_attendance;
