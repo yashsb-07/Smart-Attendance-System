@@ -75,11 +75,14 @@ api.interceptors.response.use(
                     );
 
                 const newAccess =
-                    response.data.access;
+                response.data.access;
+
+                const newRefresh =
+                    response.data.refresh || refresh;
 
                 setTokens(
                     newAccess,
-                    refresh
+                    newRefresh
                 );
 
                 originalRequest.headers.Authorization =

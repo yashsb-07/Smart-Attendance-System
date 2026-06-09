@@ -6,11 +6,16 @@ import {
 } from "react";
 
 import {
+    loginUser,
     getCurrentUser,
+    logoutUser,
 } from "../services/authService";
 
 import {
+    setTokens,
+    clearTokens,
     getAccessToken,
+    getRefreshToken,
 } from "../utils/tokenService";
 
 const AuthContext = createContext();
@@ -43,23 +48,67 @@ export const AuthProvider = ({ children }) => {
 
                 console.error(error);
 
+                clearTokens();
+
             } finally {
 
                 setLoading(false);
-
             }
-
         };
 
         loadUser();
 
     }, []);
 
+    const login = async (credentials) => {
+
+        const response =
+            await loginUser(credentials);
+
+        setTokens(
+            response.access,
+            response.refresh
+        );
+
+        setUser(response.user);
+
+        return response;
+    };
+
+    const logout = async () => {
+
+        try {
+
+            const refresh =
+                getRefreshToken();
+
+            if (refresh) {
+
+                await logoutUser(refresh);
+            }
+
+        } catch (error) {
+
+            console.error(error);
+
+        } finally {
+
+            clearTokens();
+
+            setUser(null);
+
+            window.location.href = "/login";
+        }
+    };
+
     return (
+
         <AuthContext.Provider
             value={{
                 user,
                 setUser,
+                login,
+                logout,
                 loading,
             }}
         >
