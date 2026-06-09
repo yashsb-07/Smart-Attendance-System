@@ -17,6 +17,11 @@ from datetime import timedelta
 
 load_dotenv()
 
+ALLOWED_HOSTS = os.getenv(
+    "ALLOWED_HOSTS",
+    ""
+).split(",")
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -54,6 +59,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+
+    "corsheaders.middleware.CorsMiddleware",
+
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -62,12 +70,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
-    "corsheaders.middleware.CorsMiddleware",
-
-]
-
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -177,3 +179,9 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 AUTH_USER_MODEL = 'accounts.User'
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+]
+
+CORS_ALLOW_CREDENTIALS = True
