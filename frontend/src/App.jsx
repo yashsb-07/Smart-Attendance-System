@@ -4,18 +4,14 @@ import {
     Route,
 } from "react-router-dom";
 
+import ProtectedRoute from "./components/ProtectedRoute";
+
+import MainLayout from "./layouts/MainLayout";
+
 import LoginPage from "./pages/LoginPage";
 import HomePage from "./pages/HomePage";
 
 import UnauthorizedPage from "./pages/UnauthorizedPage";
-
-import AdminPage from "./pages/AdminPage";
-import TeacherPage from "./pages/TeacherPage";
-import StudentPage from "./pages/StudentPage";
-
-import RoleRoute from "./components/routes/RoleRoute";
-
-import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
 
@@ -31,49 +27,26 @@ function App() {
                 />
 
                 <Route
-                    path="/"
+                    path="/unauthorized"
+                    element={
+                        <UnauthorizedPage />
+                    }
+                />
+
+                <Route
                     element={
                         <ProtectedRoute>
-                            <HomePage />
+                            <MainLayout />
                         </ProtectedRoute>
                     }
-                />
+                >
 
-                <Route
-                    path="/unauthorized"
-                    element={<UnauthorizedPage />}
-                />
+                    <Route
+                        path="/"
+                        element={<HomePage />}
+                    />
 
-                <Route
-                    path="/admin"
-                    element={
-                        
-                        <RoleRoute    
-                            allowedRoles={["admin"]}>
-                        </RoleRoute>
-                        
-                    }
-                />
-
-                <Route
-                    path="/teacher"
-                    element={
-
-                        <RoleRoute
-                            allowedRoles={["teacher"]}>
-                        </RoleRoute>
-                    }
-                />
-
-                <Route
-                    path="/student"
-                    element={
-                        
-                        <RoleRoute
-                            allowedRoles={["student"]}>
-                        </RoleRoute>
-                    }
-                />
+                </Route>
 
             </Routes>
 
