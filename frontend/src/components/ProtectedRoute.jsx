@@ -1,5 +1,5 @@
 import { Navigate } from "react-router-dom";
-
+import AuthLoader from "./common/AuthLoader";
 import { useAuth } from "../context/AuthContext";
 
 function ProtectedRoute({ children }) {
@@ -11,7 +11,8 @@ function ProtectedRoute({ children }) {
 
     if (loading) {
 
-        return <h3>Loading...</h3>;
+        return <AuthLoader />;
+    
     }
 
     if (!user) {

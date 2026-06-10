@@ -13,9 +13,7 @@ import AdminPage from "./pages/AdminPage";
 import TeacherPage from "./pages/TeacherPage";
 import StudentPage from "./pages/StudentPage";
 
-import AdminRoute from "./components/routes/AdminRoute";
-import TeacherRoute from "./components/routes/TeacherRoute";
-import StudentRoute from "./components/routes/StudentRoute";
+import RoleRoute from "./components/routes/RoleRoute";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -49,27 +47,31 @@ function App() {
                 <Route
                     path="/admin"
                     element={
-                        <AdminRoute>
-                            <AdminPage />
-                        </AdminRoute>
+                        
+                        <RoleRoute    
+                            allowedRoles={["admin"]}>
+                        </RoleRoute>
+                        
                     }
                 />
 
                 <Route
                     path="/teacher"
                     element={
-                        <TeacherRoute>
-                            <TeacherPage />
-                        </TeacherRoute>
+
+                        <RoleRoute
+                            allowedRoles={["teacher"]}>
+                        </RoleRoute>
                     }
                 />
 
                 <Route
                     path="/student"
                     element={
-                        <StudentRoute>
-                            <StudentPage />
-                        </StudentRoute>
+                        
+                        <RoleRoute
+                            allowedRoles={["student"]}>
+                        </RoleRoute>
                     }
                 />
 
