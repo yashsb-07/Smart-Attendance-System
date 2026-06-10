@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Outlet } from "react-router-dom";
 
 import Sidebar from "../components/layout/Sidebar";
@@ -6,15 +7,23 @@ import Footer from "../components/layout/Footer";
 
 function MainLayout() {
 
+    const [collapsed, setCollapsed] =
+        useState(false);
+
     return (
 
         <div className="layout-container">
 
-            <Sidebar />
+            <Sidebar
+                collapsed={collapsed}
+            />
 
             <div className="main-content">
 
-                <Navbar />
+                <Navbar
+                    collapsed={collapsed}
+                    setCollapsed={setCollapsed}
+                />
 
                 <div className="page-content">
 
@@ -27,6 +36,7 @@ function MainLayout() {
             </div>
 
         </div>
+
     );
 }
 

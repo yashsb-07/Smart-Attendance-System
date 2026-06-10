@@ -13,6 +13,13 @@ import HomePage from "./pages/HomePage";
 
 import UnauthorizedPage from "./pages/UnauthorizedPage";
 
+import TeachersPage from "./pages/TeachersPage";
+import StudentsPage from "./pages/StudentsPage";
+import AttendancePage from "./pages/AttendancePage";
+import ReportsPage from "./pages/ReportsPage";
+import ProfilePage from "./pages/ProfilePage";
+import AttendanceHistoryPage from "./pages/AttendanceHistoryPage";
+
 function App() {
 
     return (
@@ -44,6 +51,38 @@ function App() {
                     <Route
                         path="/"
                         element={<HomePage />}
+                    />
+
+                    <Route
+                        path="/teachers"
+                        element={<TeachersPage />}
+                    />
+
+                    <Route
+                        path="/students"
+                        element={<StudentsPage />}
+                    />
+
+                    <Route
+                        path="/attendance"
+                        element={<AttendancePage />}
+                    />
+
+                    <Route
+                        path="/reports"
+                        element={<ReportsPage />}
+                    />
+
+                    <Route
+                        path="/profile"
+                        element={<ProfilePage />}
+                    />
+
+                    <Route
+                        path="/attendance-history"
+                        element={
+                            <AttendanceHistoryPage />
+                        }
                     />
 
                 </Route>

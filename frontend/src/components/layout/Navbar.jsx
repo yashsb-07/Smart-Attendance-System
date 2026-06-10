@@ -1,6 +1,11 @@
 import { useAuth } from "../../context/AuthContext";
 
-function Navbar() {
+function Navbar({
+
+    collapsed,
+    setCollapsed,
+
+}) {
 
     const { user } = useAuth();
 
@@ -25,15 +30,30 @@ function Navbar() {
                     Smart Attendance System
                 </span>
 
-                <div>
+                <div className="d-flex gap-3 align-items-center">
 
-                    <strong>
-                        {user?.username}
-                    </strong>
+                    <button
+                        className="btn btn-outline-primary"
+                        onClick={() =>
+                            setCollapsed(
+                                !collapsed
+                            )
+                        }
+                    >
+                        ☰
+                    </button>
 
-                    {" | "}
+                    <div>
 
-                    {user?.role}
+                        <strong>
+                            {user?.username}
+                        </strong>
+
+                        {" | "}
+
+                        {user?.role}
+
+                    </div>
 
                 </div>
 

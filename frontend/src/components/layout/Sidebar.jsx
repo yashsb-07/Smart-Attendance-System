@@ -1,56 +1,89 @@
-import { Link } from "react-router-dom";
+import {
+    NavLink,
+} from "react-router-dom";
 
-function Sidebar() {
+import {
+    useAuth,
+} from "../../context/AuthContext";
+
+import {
+    navigationConfig,
+} from "../../config/navigation";
+
+function Sidebar({
+
+    collapsed,
+
+}) {
+
+    const { user } = useAuth();
+
+    const menuItems =
+        navigationConfig[
+            user?.role
+        ] || [];
 
     return (
 
         <div
             style={{
-                width: "260px",
+                width: collapsed
+                    ? "80px"
+                    : "260px",
+
                 background: "#212529",
+
                 color: "white",
+
                 minHeight: "100vh",
+
+                transition:
+                    "all 0.3s ease",
+
                 padding: "20px",
             }}
         >
 
-            <h4>
-                Smart Attendance
-            </h4>
+            <h5>
+
+                {collapsed
+                    ? "SA"
+                    : "Smart Attendance"}
+
+            </h5>
 
             <hr />
 
-            <div className="d-flex flex-column">
+            {menuItems.map(
+                (item) => (
 
-                <Link
-                    to="/"
-                    className="text-white mb-3"
-                >
-                    Home
-                </Link>
+                    <NavLink
+                        key={item.path}
+                        to={item.path}
+                        className={({
+                            isActive,
+                        }) =>
+                            `
+                            d-block
+                            mb-3
+                            p-2
+                            text-decoration-none
+                            ${
+                                isActive
+                                    ? "bg-primary text-white"
+                                    : "text-white"
+                            }
+                        `
+                        }
+                    >
 
-                <Link
-                    to="/admin"
-                    className="text-white mb-3"
-                >
-                    Admin
-                </Link>
+                        {collapsed
+                            ? item.name.charAt(0)
+                            : item.name}
 
-                <Link
-                    to="/teacher"
-                    className="text-white mb-3"
-                >
-                    Teacher
-                </Link>
-
-                <Link
-                    to="/student"
-                    className="text-white mb-3"
-                >
-                    Student
-                </Link>
-
-            </div>
+                    </NavLink>
+                )
+            )}
 
         </div>
     );
