@@ -25,9 +25,12 @@ function Navbar({
             <div className="container-fluid">
 
                 <span
-                    className="navbar-brand"
+                    className="
+                        navbar-brand
+                        fw-bold
+                    "
                 >
-                    Smart Attendance System
+                    Smart Attendance
                 </span>
 
                 <div className="d-flex gap-3 align-items-center">

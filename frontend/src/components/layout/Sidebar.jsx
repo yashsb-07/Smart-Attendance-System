@@ -13,6 +13,7 @@ import {
 function Sidebar({
 
     collapsed,
+    isMobile,
 
 }) {
 
@@ -28,8 +29,8 @@ function Sidebar({
         <div
             style={{
                 width: collapsed
-                    ? "80px"
-                    : "260px",
+                ? "80px"
+                : "260px",
 
                 background: "#212529",
 
@@ -37,10 +38,22 @@ function Sidebar({
 
                 minHeight: "100vh",
 
-                transition:
-                    "all 0.3s ease",
+                transition: "all 0.3s ease",
 
                 padding: "20px",
+
+                position: isMobile
+                ? "fixed"
+                : "relative",
+
+                top: 0,
+
+                left:
+                isMobile && collapsed
+                    ? "-260px"
+                    : "0",
+
+                zIndex: 1000,
             }}
         >
 
@@ -60,9 +73,7 @@ function Sidebar({
                     <NavLink
                         key={item.path}
                         to={item.path}
-                        className={({
-                            isActive,
-                        }) =>
+                        className={({ isActive }) =>
                             `
                             d-block
                             mb-3
@@ -73,13 +84,21 @@ function Sidebar({
                                     ? "bg-primary text-white"
                                     : "text-white"
                             }
-                        `
+                            `
                         }
                     >
 
-                        {collapsed
-                            ? item.name.charAt(0)
-                            : item.name}
+                        <>
+                            {item.icon}
+
+                            {!collapsed && (
+
+                                <span className="ms-2">
+                                    {item.name}
+                                </span>
+
+                            )}
+                        </>
 
                     </NavLink>
                 )
