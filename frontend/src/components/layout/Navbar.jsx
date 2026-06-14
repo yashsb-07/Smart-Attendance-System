@@ -7,7 +7,10 @@ function Navbar({
 
 }) {
 
-    const { user } = useAuth();
+    const {
+        user,
+        logout,
+    } = useAuth();
 
     return (
 
@@ -24,30 +27,22 @@ function Navbar({
 
             <div className="container-fluid">
 
-                <span
-                    className="
-                        navbar-brand
-                        fw-bold
-                    "
-                >
+                <span className="navbar-brand fw-bold">
                     Smart Attendance
                 </span>
 
-                <div className="d-flex gap-3 align-items-center">
+                <div className="d-flex align-items-center gap-3">
 
                     <button
                         className="btn btn-outline-primary"
                         onClick={() =>
-                            setCollapsed(
-                                !collapsed
-                            )
+                            setCollapsed(!collapsed)
                         }
                     >
                         ☰
                     </button>
 
                     <div>
-
                         <strong>
                             {user?.username}
                         </strong>
@@ -55,8 +50,14 @@ function Navbar({
                         {" | "}
 
                         {user?.role}
-
                     </div>
+
+                    <button
+                        className="btn btn-danger btn-sm"
+                        onClick={logout}
+                    >
+                        Logout
+                    </button>
 
                 </div>
 
