@@ -1,38 +1,74 @@
-import { useAuth } from "../context/AuthContext";
+import PageHeader from
+"../components/common/PageHeader";
+
+import StatsCard from
+"../components/common/StatsCard";
+
+import ContentCard from
+"../components/common/ContentCard";
 
 function HomePage() {
 
-    const {
-        user,
-        logout,
-    } = useAuth();
-
     return (
 
-        <div className="container mt-5">
+        <>
 
-            <h1>
-                Smart Attendance System
-            </h1>
+            <PageHeader
+                title="Dashboard"
+                subtitle="
+                Welcome to Smart Attendance System
+                "
+            />
 
-            <hr />
+            <div className="row g-4">
 
-            <h4>
-                Welcome {user?.username}
-            </h4>
+                <div className="col-md-4">
 
-            <p>
-                Role: {user?.role}
-            </p>
+                    <StatsCard
+                        title="Students"
+                        value="250"
+                    />
 
-            <button
-                className="btn btn-danger"
-                onClick={logout}
-            >
-                Logout
-            </button>
+                </div>
 
-        </div>
+                <div className="col-md-4">
+
+                    <StatsCard
+                        title="Present"
+                        value="220"
+                    />
+
+                </div>
+
+                <div className="col-md-4">
+
+                    <StatsCard
+                        title="Absent"
+                        value="30"
+                    />
+
+                </div>
+
+            </div>
+
+            <div className="mt-4">
+
+                <ContentCard
+                    title="
+                    Recent Activity
+                    "
+                >
+
+                    <p>
+                        Dashboard
+                        foundation ready.
+                    </p>
+
+                </ContentCard>
+
+            </div>
+
+        </>
     );
 }
 
