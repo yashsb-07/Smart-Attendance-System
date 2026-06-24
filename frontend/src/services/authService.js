@@ -1,8 +1,10 @@
 import api from "../api/axios";
 
+import { API_ENDPOINTS, } from "../api/endpoints";
+
 export const loginUser = async (credentials) => {
     const response = await api.post(
-        "/auth/login/",
+        API_ENDPOINTS.AUTH.LOGIN,
         credentials
     );
 
@@ -11,7 +13,7 @@ export const loginUser = async (credentials) => {
 
 export const getCurrentUser = async () => {
     const response = await api.get(
-        "/auth/me/"
+        API_ENDPOINTS.AUTH.CURRENT_USER
     );
 
     return response.data;
@@ -19,7 +21,7 @@ export const getCurrentUser = async () => {
 
 export const refreshToken = async (refresh) => {
     const response = await api.post(
-        "/auth/refresh/",
+        API_ENDPOINTS.AUTH.REFRESH,
         {
             refresh,
         }
@@ -30,7 +32,7 @@ export const refreshToken = async (refresh) => {
 
 export const logoutUser = async (refresh) => {
     const response = await api.post(
-        "/auth/logout/",
+        API_ENDPOINTS.AUTH.LOGOUT,
         {
             refresh,
         }

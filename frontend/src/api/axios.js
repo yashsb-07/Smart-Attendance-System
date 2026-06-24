@@ -1,4 +1,7 @@
 import axios from "axios";
+import {
+    API_ENDPOINTS,
+} from "./endpoints";
 
 import {
     getAccessToken,
@@ -68,7 +71,7 @@ api.interceptors.response.use(
 
                 const response =
                     await axios.post(
-                        "http://127.0.0.1:8000/api/auth/refresh/",
+                        `${import.meta.env.VITE_API_BASE_URL}${API_ENDPOINTS.AUTH.REFRESH}`,
                         {
                             refresh,
                         }
