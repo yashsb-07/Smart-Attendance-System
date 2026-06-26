@@ -19,6 +19,7 @@ import AttendancePage from "./pages/AttendancePage";
 import ReportsPage from "./pages/ReportsPage";
 import ProfilePage from "./pages/ProfilePage";
 import AttendanceHistoryPage from "./pages/AttendanceHistoryPage";
+import DepartmentsPage from "./pages/DepartmentsPage";
 
 function App() {
 
@@ -82,6 +83,13 @@ function App() {
                         path="/attendance-history"
                         element={
                             <AttendanceHistoryPage />
+                        }
+                    />
+
+                    <Route
+                        path="/departments"
+                        element={
+                            <DepartmentsPage />
                         }
                     />
 

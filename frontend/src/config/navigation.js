@@ -11,9 +11,9 @@ export const navigationConfig = {
         },
 
         {
-            name: "Teachers",
-            path: "/teachers",
-            icon: "👨‍🏫",
+            name: "Departments",
+            path: "/departments",
+            icon: "🏢",
         },
 
         {
