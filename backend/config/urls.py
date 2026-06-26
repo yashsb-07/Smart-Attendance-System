@@ -29,4 +29,9 @@ urlpatterns = [
         include('apps.accounts.urls'),
     ),
 
+    path(
+        "api/departments/",
+        include("apps.departments.urls")
+    ),
+
 ]
