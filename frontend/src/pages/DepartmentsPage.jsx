@@ -12,12 +12,20 @@ import ContentCard from
 import {
     getDepartments,
     createDepartment,
+    updateDepartment,
+    deleteDepartment,
 } from "../services/departmentService";
 
 function DepartmentsPage() {
 
     const [departments,
         setDepartments] = useState([]);
+
+    const [search,
+        setSearch] = useState("");
+
+    const [editingId,
+        setEditingId] = useState(null);
 
     const [formData,
         setFormData] = useState({
@@ -51,15 +59,26 @@ function DepartmentsPage() {
     };
 
     const handleSubmit = async (e) => {
+
         e.preventDefault();
 
         try {
-            console.log("Submitting:", formData);
 
-            const response =
-                await createDepartment(formData);
+            if (editingId) {
 
-            console.log("Created:", response);
+                await updateDepartment(
+                    editingId,
+                    formData
+                );
+
+                setEditingId(null);
+
+            } else {
+
+                await createDepartment(
+                    formData
+                );
+            }
 
             setFormData({
                 name: "",
@@ -70,12 +89,51 @@ function DepartmentsPage() {
             fetchDepartments();
 
         } catch (error) {
+
             console.error(
-                "Department create error:",
+                "Department error:",
                 error.response?.data || error
             );
         }
     };
+
+    const handleEdit = (dept) => {
+
+        setEditingId(dept.id);
+
+        setFormData({
+            name: dept.name,
+            code: dept.code,
+            description:
+                dept.description || "",
+        });
+    };
+
+    const handleDelete = async (id) => {
+
+        try {
+
+            await deleteDepartment(id);
+
+            fetchDepartments();
+
+        } catch (error) {
+
+            console.error(
+                "Delete error:",
+                error.response?.data || error
+            );
+        }
+    };
+
+    const filteredDepartments =
+        departments.filter((dept) =>
+            dept.name
+                .toLowerCase()
+                .includes(
+                    search.toLowerCase()
+                )
+        );
 
     return (
         <>
@@ -164,7 +222,9 @@ function DepartmentsPage() {
                                 w-100
                                 "
                             >
-                                Add
+                                {editingId
+                                    ? "Update Department"
+                                    : "Add Department"}
                             </button>
 
                         </form>
@@ -181,6 +241,23 @@ function DepartmentsPage() {
                         "
                     >
 
+                        <input
+                            type="text"
+                            className="
+                            form-control
+                            mb-3
+                            "
+                            placeholder="
+                            Search department...
+                            "
+                            value={search}
+                            onChange={(e) =>
+                                setSearch(
+                                    e.target.value
+                                )
+                            }
+                        />
+
                         <table
                             className="
                             table
@@ -194,15 +271,14 @@ function DepartmentsPage() {
                                     <th>Name</th>
                                     <th>Code</th>
                                     <th>Description</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
 
                             <tbody>
 
-                                {departments.map(
-                                    (
-                                        dept
-                                    ) => (
+                                {filteredDepartments.map(
+                                    (dept) => (
                                         <tr
                                             key={
                                                 dept.id
@@ -213,21 +289,60 @@ function DepartmentsPage() {
                                                     dept.id
                                                 }
                                             </td>
+
                                             <td>
                                                 {
                                                     dept.name
                                                 }
                                             </td>
+
                                             <td>
                                                 {
                                                     dept.code
                                                 }
                                             </td>
+
                                             <td>
                                                 {
                                                     dept.description
                                                 }
                                             </td>
+
+                                            <td>
+
+                                                <button
+                                                    className="
+                                                    btn
+                                                    btn-warning
+                                                    btn-sm
+                                                    me-2
+                                                    "
+                                                    onClick={() =>
+                                                        handleEdit(
+                                                            dept
+                                                        )
+                                                    }
+                                                >
+                                                    Edit
+                                                </button>
+
+                                                <button
+                                                    className="
+                                                    btn
+                                                    btn-danger
+                                                    btn-sm
+                                                    "
+                                                    onClick={() =>
+                                                        handleDelete(
+                                                            dept.id
+                                                        )
+                                                    }
+                                                >
+                                                    Delete
+                                                </button>
+
+                                            </td>
+
                                         </tr>
                                     )
                                 )}
