@@ -1,0 +1,52 @@
+-- To create db use this: --
+
+1. CREATE DATABASE smart_attendance;
+
+2. USE smart_attendance;
+
+3. CREATE TABLE students (
+    Id INT AUTO_INCREMENT PRIMARY KEY,
+    Name VARCHAR(255) NOT NULL,
+    Roll_Number VARCHAR(50) UNIQUE NOT NULL,
+	department VARCHAR(50),
+	student_class VARCHAR(50),
+    semester VARCHAR(20),
+    Image_Path VARCHAR(255) NOT NULL,
+    Face_Encoding TEXT
+);
+
+4. CREATE TABLE attendance (
+    Id INT AUTO_INCREMENT PRIMARY KEY,
+    Name VARCHAR(255) NOT NULL,
+    Roll_Number VARCHAR(50),
+    Date DATE NOT NULL,
+    Status VARCHAR(20) NOT NULL,
+	FOREIGN KEY (roll_number) REFERENCES students(roll_number),
+    Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+5. CREATE TABLE admins (
+    Id INT AUTO_INCREMENT PRIMARY KEY,
+    Name VARCHAR(255) NOT NULL,
+    Username VARCHAR(255) UNIQUE NOT NULL,
+    Password VARCHAR(255) NOT NULL
+);
+
+6. INSERT INTO admins (Name, Username, Password) 
+   VALUES ('Yash Bansode', 'yashsb@gmail.com', '$2b$12$LHwwwpUCsdTMxF8BAR/C9.te2.g0CGkgEW1S7njTtwImoPdupwYxq');
+
+SHOW TABLES;
+DESC students;
+DESC attendance;
+DESC admins;
+ALTER TABLE admins MODIFY COLUMN password VARCHAR(255);
+
+SELECT * FROM students;
+SELECT * FROM attendance;
+SELECT * FROM admins;
+
+DROP TABLE students;
+DROP TABLE attendance;
+DROP TABLE admins;
+
+DROP DATABASE smart_attendance;

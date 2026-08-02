@@ -1,0 +1,8 @@
+flask
+opencv-python
+face_recognition
+dlib>=19.7
+bcrypt
+mysql-connector-python
+pandas
+fpdf
