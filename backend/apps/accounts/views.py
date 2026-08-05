@@ -1,3 +1,6 @@
-from django.shortcuts import render
+"""
+API views for the Accounts module.
 
-# Create your views here.
+Authentication endpoints will be implemented
+in the following steps.
+"""
