@@ -1,14 +1,16 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+from .managers import UserManager
+
 
 class User(AbstractUser):
-    """
-    Custom User model.
+    email = models.EmailField(unique=True)
 
-    Additional fields will be added in future modules
-    (Institution, Role, Profile, etc.).
-    """
+    objects = UserManager()
+
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["username"]
 
     class Meta:
         db_table = "users"
