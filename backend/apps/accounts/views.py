@@ -1,9 +1,11 @@
-from rest_framework import permissions, status
-from rest_framework.response import Response
-from rest_framework.views import APIView
+from rest_framework import permissions
 
+from apps.common.responses import success_response
 from .serializers import LoginSerializer, LogoutSerializer
 from .services import login_user, logout_user
+
+from rest_framework.views import APIView
+
 
 class LoginAPIView(APIView):
     permission_classes = []
@@ -19,25 +21,21 @@ class LoginAPIView(APIView):
 
         user = auth_data["user"]
 
-        return Response(
-            {
-                "success": True,
-                "message": "Login successful.",
-                "data": {
-                    "user": {
-                        "id": user.id,
-                        "username": user.username,
-                        "email": user.email,
-                        "first_name": user.first_name,
-                        "last_name": user.last_name,
-                    },
-                    "tokens": {
-                        "access": auth_data["access"],
-                        "refresh": auth_data["refresh"],
-                    },
+        return success_response(
+            message="Login successful.",
+            data={
+                "user": {
+                    "id": user.id,
+                    "username": user.username,
+                    "email": user.email,
+                    "first_name": user.first_name,
+                    "last_name": user.last_name,
+                },
+                "tokens": {
+                    "access": auth_data["access"],
+                    "refresh": auth_data["refresh"],
                 },
             },
-            status=status.HTTP_200_OK,
         )
 
 
@@ -47,21 +45,17 @@ class CurrentUserAPIView(APIView):
     def get(self, request):
         user = request.user
 
-        return Response(
-            {
-                "success": True,
-                "message": "Authenticated user retrieved successfully.",
-                "data": {
-                    "id": user.id,
-                    "username": user.username,
-                    "email": user.email,
-                    "first_name": user.first_name,
-                    "last_name": user.last_name,
-                    "is_staff": user.is_staff,
-                    "is_superuser": user.is_superuser,
-                },
+        return success_response(
+            message="Authenticated user retrieved successfully.",
+            data={
+                "id": user.id,
+                "username": user.username,
+                "email": user.email,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "is_staff": user.is_staff,
+                "is_superuser": user.is_superuser,
             },
-            status=status.HTTP_200_OK,
         )
 
 
@@ -76,11 +70,7 @@ class LogoutAPIView(APIView):
             refresh_token=serializer.validated_data["refresh"],
         )
 
-        return Response(
-            {
-                "success": True,
-                "message": "Logout successful.",
-                "data": None,
-            },
-            status=status.HTTP_200_OK,
+        return success_response(
+            message="Logout successful.",
+            data=None,
         )
