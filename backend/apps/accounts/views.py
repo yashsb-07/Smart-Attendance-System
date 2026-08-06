@@ -1,10 +1,11 @@
 from rest_framework import permissions
+from rest_framework.views import APIView
 
 from apps.common.responses import success_response
+
+from .presenters import present_current_user, present_login
 from .serializers import LoginSerializer, LogoutSerializer
 from .services import login_user, logout_user
-
-from rest_framework.views import APIView
 
 
 class LoginAPIView(APIView):
@@ -19,23 +20,9 @@ class LoginAPIView(APIView):
             password=serializer.validated_data["password"],
         )
 
-        user = auth_data["user"]
-
         return success_response(
             message="Login successful.",
-            data={
-                "user": {
-                    "id": user.id,
-                    "username": user.username,
-                    "email": user.email,
-                    "first_name": user.first_name,
-                    "last_name": user.last_name,
-                },
-                "tokens": {
-                    "access": auth_data["access"],
-                    "refresh": auth_data["refresh"],
-                },
-            },
+            data=present_login(auth_data),
         )
 
 
@@ -43,19 +30,9 @@ class CurrentUserAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        user = request.user
-
         return success_response(
             message="Authenticated user retrieved successfully.",
-            data={
-                "id": user.id,
-                "username": user.username,
-                "email": user.email,
-                "first_name": user.first_name,
-                "last_name": user.last_name,
-                "is_staff": user.is_staff,
-                "is_superuser": user.is_superuser,
-            },
+            data=present_current_user(request.user),
         )
 
 
