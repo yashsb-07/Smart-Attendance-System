@@ -1,4 +1,4 @@
-from rest_framework import status
+from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -36,6 +36,30 @@ class LoginAPIView(APIView):
                         "access": auth_data["access"],
                         "refresh": auth_data["refresh"],
                     },
+                },
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
+class CurrentUserAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+
+        return Response(
+            {
+                "success": True,
+                "message": "Authenticated user retrieved successfully.",
+                "data": {
+                    "id": user.id,
+                    "username": user.username,
+                    "email": user.email,
+                    "first_name": user.first_name,
+                    "last_name": user.last_name,
+                    "is_staff": user.is_staff,
+                    "is_superuser": user.is_superuser,
                 },
             },
             status=status.HTTP_200_OK,
