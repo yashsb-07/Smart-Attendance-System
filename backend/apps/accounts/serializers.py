@@ -8,3 +8,6 @@ class LoginSerializer(serializers.Serializer):
         trim_whitespace=False,
         style={"input_type": "password"},
     )
+
+class LogoutSerializer(serializers.Serializer):
+    refresh = serializers.CharField()

@@ -2,9 +2,8 @@ from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .serializers import LoginSerializer
-from .services import login_user
-
+from .serializers import LoginSerializer, LogoutSerializer
+from .services import login_user, logout_user
 
 class LoginAPIView(APIView):
     permission_classes = []
@@ -61,6 +60,27 @@ class CurrentUserAPIView(APIView):
                     "is_staff": user.is_staff,
                     "is_superuser": user.is_superuser,
                 },
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
+class LogoutAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        serializer = LogoutSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        logout_user(
+            refresh_token=serializer.validated_data["refresh"],
+        )
+
+        return Response(
+            {
+                "success": True,
+                "message": "Logout successful.",
+                "data": None,
             },
             status=status.HTTP_200_OK,
         )
