@@ -27,3 +27,22 @@ def login_user(*, email: str, password: str) -> dict:
 def logout_user(*, refresh_token: str) -> None:
     token = RefreshToken(refresh_token)
     token.blacklist()
+
+def request_password_reset(*, email: str) -> None:
+    """
+    Password reset request service.
+
+    Token generation and email delivery will be implemented
+    in the next steps.
+    """
+    pass
+
+
+def confirm_password_reset(*, token: str, password: str) -> None:
+    """
+    Password reset confirmation service.
+
+    Token validation and password update will be implemented
+    in the next steps.
+    """
+    pass

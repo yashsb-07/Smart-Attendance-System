@@ -7,6 +7,20 @@ from .presenters import present_current_user, present_login
 from .serializers import LoginSerializer, LogoutSerializer
 from .services import login_user, logout_user
 
+from .serializers import (
+    LoginSerializer,
+    LogoutSerializer,
+    PasswordResetConfirmSerializer,
+    PasswordResetRequestSerializer,
+)
+
+from .services import (
+    confirm_password_reset,
+    login_user,
+    logout_user,
+    request_password_reset,
+)
+
 
 class LoginAPIView(APIView):
     permission_classes = []
@@ -49,5 +63,39 @@ class LogoutAPIView(APIView):
 
         return success_response(
             message="Logout successful.",
+            data=None,
+        )
+
+class PasswordResetRequestAPIView(APIView):
+    permission_classes = []
+
+    def post(self, request):
+        serializer = PasswordResetRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        request_password_reset(
+            email=serializer.validated_data["email"],
+        )
+
+        return success_response(
+            message="If the email exists, password reset instructions will be sent.",
+            data=None,
+        )
+
+
+class PasswordResetConfirmAPIView(APIView):
+    permission_classes = []
+
+    def post(self, request):
+        serializer = PasswordResetConfirmSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        confirm_password_reset(
+            token=serializer.validated_data["token"],
+            password=serializer.validated_data["password"],
+        )
+
+        return success_response(
+            message="Password has been reset successfully.",
             data=None,
         )
