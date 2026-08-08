@@ -1,8 +1,11 @@
+from datetime import timedelta
+
 from django.contrib.auth.models import AnonymousUser
 from django.core import mail
 from django.test import TestCase, override_settings
 from rest_framework.request import Request
 from rest_framework.test import APIRequestFactory, APITestCase
+from rest_framework_simplejwt.tokens import AccessToken
 
 from .models import Role, User
 from .permissions import (
@@ -347,6 +350,7 @@ class EmailVerificationTests(TestCase):
             0,
         )
 
+
 class SessionValidationTests(APITestCase):
     def setUp(self):
         self.role = Role.objects.get(
@@ -418,10 +422,6 @@ class SessionValidationTests(APITestCase):
         )
 
     def test_expired_access_token_is_rejected(self):
-        from datetime import timedelta
-
-        from rest_framework_simplejwt.tokens import AccessToken
-
         token = AccessToken.for_user(self.user)
 
         token.set_exp(
@@ -449,6 +449,350 @@ class SessionValidationTests(APITestCase):
         response = self.client.post(
             "/api/v1/auth/session/validate/",
             {},
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            400,
+        )
+
+        self.assertFalse(
+            response.data["success"],
+        )
+
+
+class AuthenticationAPITests(APITestCase):
+    def setUp(self):
+        self.role = Role.objects.get(
+            name=Role.RoleName.STUDENT,
+        )
+
+        self.user = User.objects.create_user(
+            email="api-user@example.com",
+            password="TestPassword123!",
+            username="api_user",
+            role=self.role,
+        )
+
+    def login(self):
+        return self.client.post(
+            "/api/v1/auth/login/",
+            {
+                "email": self.user.email,
+                "password": "TestPassword123!",
+            },
+            format="json",
+        )
+
+    def test_login_returns_access_and_refresh_tokens(self):
+        response = self.login()
+
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+
+        self.assertTrue(
+            response.data["success"],
+        )
+
+        self.assertIn(
+            "access",
+            response.data["data"]["tokens"],
+        )
+
+        self.assertIn(
+            "refresh",
+            response.data["data"]["tokens"],
+        )
+
+        self.assertEqual(
+            response.data["data"]["user"]["email"],
+            self.user.email,
+        )
+
+    def test_login_rejects_invalid_password(self):
+        response = self.client.post(
+            "/api/v1/auth/login/",
+            {
+                "email": self.user.email,
+                "password": "WrongPassword123!",
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            401,
+        )
+
+        self.assertFalse(
+            response.data["success"],
+        )
+
+    def test_login_rejects_inactive_user(self):
+        self.user.is_active = False
+        self.user.save(
+            update_fields=["is_active"],
+        )
+
+        response = self.login()
+
+        self.assertEqual(
+            response.status_code,
+            401,
+        )
+
+        self.assertFalse(
+            response.data["success"],
+        )
+
+    def test_current_user_requires_authentication(self):
+        response = self.client.get(
+            "/api/v1/auth/me/",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            401,
+        )
+
+        self.assertFalse(
+            response.data["success"],
+        )
+
+    def test_current_user_returns_authenticated_user(self):
+        self.client.force_authenticate(
+            user=self.user,
+        )
+
+        response = self.client.get(
+            "/api/v1/auth/me/",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+
+        self.assertTrue(
+            response.data["success"],
+        )
+
+        self.assertEqual(
+            response.data["data"]["email"],
+            self.user.email,
+        )
+
+        self.assertFalse(
+            response.data["data"]["email_verified"],
+        )
+
+    def test_logout_requires_authentication(self):
+        response = self.client.post(
+            "/api/v1/auth/logout/",
+            {
+                "refresh": "invalid-refresh-token",
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            401,
+        )
+
+        self.assertFalse(
+            response.data["success"],
+        )
+
+    def test_logout_blacklists_refresh_token(self):
+        response = self.login()
+
+        refresh_token = response.data["data"]["tokens"]["refresh"]
+
+        self.client.force_authenticate(
+            user=self.user,
+        )
+
+        response = self.client.post(
+            "/api/v1/auth/logout/",
+            {
+                "refresh": refresh_token,
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+
+        self.assertTrue(
+            response.data["success"],
+        )
+
+        response = self.client.post(
+            "/api/v1/auth/token/refresh/",
+            {
+                "refresh": refresh_token,
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            401,
+        )
+
+        self.assertFalse(
+            response.data["success"],
+        )
+
+    def test_refresh_token_returns_new_access_token(self):
+        response = self.login()
+
+        refresh_token = response.data["data"]["tokens"]["refresh"]
+
+        response = self.client.post(
+            "/api/v1/auth/token/refresh/",
+            {
+                "refresh": refresh_token,
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+
+        self.assertIn(
+            "access",
+            response.data,
+        )
+
+    def test_password_reset_request_api(self):
+        with self.settings(
+            EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+        ):
+            response = self.client.post(
+                "/api/v1/auth/password-reset/",
+                {
+                    "email": self.user.email,
+                },
+                format="json",
+            )
+
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+
+        self.assertTrue(
+            response.data["success"],
+        )
+
+    def test_password_reset_request_api_does_not_reveal_unknown_email(self):
+        with self.settings(
+            EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+        ):
+            response = self.client.post(
+                "/api/v1/auth/password-reset/",
+                {
+                    "email": "unknown@example.com",
+                },
+                format="json",
+            )
+
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+
+        self.assertTrue(
+            response.data["success"],
+        )
+
+    def test_email_verification_request_requires_authentication(self):
+        response = self.client.post(
+            "/api/v1/auth/email-verification/",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            401,
+        )
+
+        self.assertFalse(
+            response.data["success"],
+        )
+
+    def test_email_verification_request_api(self):
+        with self.settings(
+            EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+        ):
+            self.client.force_authenticate(
+                user=self.user,
+            )
+
+            response = self.client.post(
+                "/api/v1/auth/email-verification/",
+            )
+
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+
+        self.assertTrue(
+            response.data["success"],
+        )
+
+    def test_email_verification_confirm_api(self):
+        with self.settings(
+            EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+        ):
+            request_email_verification(
+                user=self.user,
+            )
+
+            verification_token = (
+                mail.outbox[0]
+                .body
+                .split(
+                    "Use the following verification token to continue:\n\n",
+                    1,
+                )[1]
+                .split("\n\n", 1)[0]
+            )
+
+            response = self.client.post(
+                "/api/v1/auth/email-verification/confirm/",
+                {
+                    "token": verification_token,
+                },
+                format="json",
+            )
+
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+
+        self.user.refresh_from_db()
+
+        self.assertTrue(
+            self.user.email_verified,
+        )
+
+    def test_email_verification_confirm_rejects_invalid_token(self):
+        response = self.client.post(
+            "/api/v1/auth/email-verification/confirm/",
+            {
+                "token": "invalid-token",
+            },
             format="json",
         )
 
