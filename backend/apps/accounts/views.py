@@ -4,16 +4,12 @@ from rest_framework.views import APIView
 from apps.common.responses import success_response
 
 from .presenters import present_current_user, present_login
-from .serializers import LoginSerializer, LogoutSerializer
-from .services import login_user, logout_user
-
 from .serializers import (
     LoginSerializer,
     LogoutSerializer,
     PasswordResetConfirmSerializer,
     PasswordResetRequestSerializer,
 )
-
 from .services import (
     confirm_password_reset,
     login_user,
@@ -66,11 +62,14 @@ class LogoutAPIView(APIView):
             data=None,
         )
 
+
 class PasswordResetRequestAPIView(APIView):
     permission_classes = []
 
     def post(self, request):
-        serializer = PasswordResetRequestSerializer(data=request.data)
+        serializer = PasswordResetRequestSerializer(
+            data=request.data,
+        )
         serializer.is_valid(raise_exception=True)
 
         request_password_reset(
@@ -78,7 +77,10 @@ class PasswordResetRequestAPIView(APIView):
         )
 
         return success_response(
-            message="If the email exists, password reset instructions will be sent.",
+            message=(
+                "If the email exists, password reset instructions "
+                "will be sent."
+            ),
             data=None,
         )
 
@@ -87,7 +89,9 @@ class PasswordResetConfirmAPIView(APIView):
     permission_classes = []
 
     def post(self, request):
-        serializer = PasswordResetConfirmSerializer(data=request.data)
+        serializer = PasswordResetConfirmSerializer(
+            data=request.data,
+        )
         serializer.is_valid(raise_exception=True)
 
         confirm_password_reset(

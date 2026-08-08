@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AnonymousUser
-from django.test import TestCase
+from django.core import mail
+from django.test import TestCase, override_settings
 from rest_framework.request import Request
 from rest_framework.test import APIRequestFactory
 
@@ -9,6 +10,10 @@ from .permissions import (
     IsInstitutionAdministrator,
     IsStudent,
     IsSuperAdministrator,
+)
+from .services import (
+    confirm_password_reset,
+    request_password_reset,
 )
 
 
@@ -124,3 +129,111 @@ class RolePermissionTests(TestCase):
         self.assertFalse(
             IsStudent().has_permission(request, None)
         )
+
+
+@override_settings(
+    EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+)
+class PasswordResetTests(TestCase):
+    def setUp(self):
+        self.role = Role.objects.get(
+            name=Role.RoleName.STUDENT,
+        )
+
+        self.user = User.objects.create_user(
+            email="password-reset@example.com",
+            password="OldPassword123!",
+            username="password_reset_user",
+            role=self.role,
+        )
+
+    def test_password_reset_request_sends_email(self):
+        request_password_reset(
+            email=self.user.email,
+        )
+
+        self.assertEqual(
+            len(mail.outbox),
+            1,
+        )
+
+        self.assertEqual(
+            mail.outbox[0].to,
+            [self.user.email],
+        )
+
+        self.assertIn(
+            "Password Reset Request",
+            mail.outbox[0].subject,
+        )
+
+        self.assertIn(
+            "password reset token",
+            mail.outbox[0].body.lower(),
+        )
+
+    def test_password_reset_request_does_not_reveal_unknown_email(self):
+        request_password_reset(
+            email="unknown@example.com",
+        )
+
+        self.assertEqual(
+            len(mail.outbox),
+            0,
+        )
+
+    def test_password_reset_confirmation_changes_password(self):
+        request_password_reset(
+            email=self.user.email,
+        )
+
+        reset_token = (
+            mail.outbox[0]
+            .body
+            .split(
+                "Use the following password reset token to continue:\n\n",
+                1,
+            )[1]
+            .split("\n\n", 1)[0]
+        )
+
+        confirm_password_reset(
+            token=reset_token,
+            password="NewPassword123!",
+        )
+
+        self.user.refresh_from_db()
+
+        self.assertTrue(
+            self.user.check_password("NewPassword123!")
+        )
+
+        self.assertFalse(
+            self.user.check_password("OldPassword123!")
+        )
+
+    def test_password_reset_token_cannot_be_reused(self):
+        request_password_reset(
+            email=self.user.email,
+        )
+
+        reset_token = (
+            mail.outbox[0]
+            .body
+            .split(
+                "Use the following password reset token to continue:\n\n",
+                1,
+            )[1]
+            .split("\n\n", 1)[0]
+        )
+
+        confirm_password_reset(
+            token=reset_token,
+            password="NewPassword123!",
+        )
+
+        with self.assertRaises(Exception):
+            confirm_password_reset(
+                token=reset_token,
+                password="AnotherPassword123!",
+            )
