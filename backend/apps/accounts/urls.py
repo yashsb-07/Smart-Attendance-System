@@ -2,19 +2,17 @@ from django.urls import path
 
 from .views import (
     CurrentUserAPIView,
-    LoginAPIView,
-    LogoutAPIView,
-)
-
-from .views import (
-    CurrentUserAPIView,
+    EmailVerificationConfirmAPIView,
+    EmailVerificationRequestAPIView,
     LoginAPIView,
     LogoutAPIView,
     PasswordResetConfirmAPIView,
     PasswordResetRequestAPIView,
 )
 
+
 app_name = "accounts"
+
 
 urlpatterns = [
     path(
@@ -32,16 +30,24 @@ urlpatterns = [
         CurrentUserAPIView.as_view(),
         name="current-user",
     ),
-
     path(
         "password-reset/",
         PasswordResetRequestAPIView.as_view(),
         name="password-reset",
     ),
-
     path(
         "password-reset/confirm/",
         PasswordResetConfirmAPIView.as_view(),
         name="password-reset-confirm",
+    ),
+    path(
+        "email-verification/",
+        EmailVerificationRequestAPIView.as_view(),
+        name="email-verification",
+    ),
+    path(
+        "email-verification/confirm/",
+        EmailVerificationConfirmAPIView.as_view(),
+        name="email-verification-confirm",
     ),
 ]

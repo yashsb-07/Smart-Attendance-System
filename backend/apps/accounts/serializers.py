@@ -32,3 +32,11 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
     def validate_password(self, value):
         validate_password(value)
         return value
+
+
+class EmailVerificationConfirmSerializer(serializers.Serializer):
+    token = serializers.CharField()
+
+
+class EmailVerificationRequestSerializer(serializers.Serializer):
+    pass

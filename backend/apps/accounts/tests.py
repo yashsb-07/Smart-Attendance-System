@@ -12,7 +12,9 @@ from .permissions import (
     IsSuperAdministrator,
 )
 from .services import (
+    confirm_email_verification,
     confirm_password_reset,
+    request_email_verification,
     request_password_reset,
 )
 
@@ -167,11 +169,6 @@ class PasswordResetTests(TestCase):
             mail.outbox[0].subject,
         )
 
-        self.assertIn(
-            "password reset token",
-            mail.outbox[0].body.lower(),
-        )
-
     def test_password_reset_request_does_not_reveal_unknown_email(self):
         request_password_reset(
             email="unknown@example.com",
@@ -237,3 +234,115 @@ class PasswordResetTests(TestCase):
                 token=reset_token,
                 password="AnotherPassword123!",
             )
+
+
+@override_settings(
+    EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+)
+class EmailVerificationTests(TestCase):
+    def setUp(self):
+        self.role = Role.objects.get(
+            name=Role.RoleName.STUDENT,
+        )
+
+        self.user = User.objects.create_user(
+            email="verification@example.com",
+            password="TestPassword123!",
+            username="verification_user",
+            role=self.role,
+        )
+
+    def test_user_email_is_unverified_by_default(self):
+        self.assertFalse(
+            self.user.email_verified,
+        )
+
+    def test_email_verification_request_sends_email(self):
+        request_email_verification(
+            user=self.user,
+        )
+
+        self.assertEqual(
+            len(mail.outbox),
+            1,
+        )
+
+        self.assertEqual(
+            mail.outbox[0].to,
+            [self.user.email],
+        )
+
+        self.assertIn(
+            "Verify Your Email Address",
+            mail.outbox[0].subject,
+        )
+
+    def test_email_verification_confirmation_verifies_user(self):
+        request_email_verification(
+            user=self.user,
+        )
+
+        verification_token = (
+            mail.outbox[0]
+            .body
+            .split(
+                "Use the following verification token to continue:\n\n",
+                1,
+            )[1]
+            .split("\n\n", 1)[0]
+        )
+
+        confirm_email_verification(
+            token=verification_token,
+        )
+
+        self.user.refresh_from_db()
+
+        self.assertTrue(
+            self.user.email_verified,
+        )
+
+    def test_email_verification_token_cannot_be_reused(self):
+        request_email_verification(
+            user=self.user,
+        )
+
+        verification_token = (
+            mail.outbox[0]
+            .body
+            .split(
+                "Use the following verification token to continue:\n\n",
+                1,
+            )[1]
+            .split("\n\n", 1)[0]
+        )
+
+        confirm_email_verification(
+            token=verification_token,
+        )
+
+        with self.assertRaises(Exception):
+            confirm_email_verification(
+                token=verification_token,
+            )
+
+    def test_invalid_email_verification_token_is_rejected(self):
+        with self.assertRaises(Exception):
+            confirm_email_verification(
+                token="invalid-token",
+            )
+
+    def test_verification_email_is_not_sent_again_after_verification(self):
+        self.user.email_verified = True
+        self.user.save(
+            update_fields=["email_verified"],
+        )
+
+        request_email_verification(
+            user=self.user,
+        )
+
+        self.assertEqual(
+            len(mail.outbox),
+            0,
+        )

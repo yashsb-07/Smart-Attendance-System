@@ -36,6 +36,10 @@ class Role(models.Model):
 class User(AbstractUser):
     email = models.EmailField(unique=True)
 
+    email_verified = models.BooleanField(
+        default=False,
+    )
+
     role = models.ForeignKey(
         Role,
         on_delete=models.PROTECT,

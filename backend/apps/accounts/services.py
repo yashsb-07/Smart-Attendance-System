@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth import authenticate
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.core.mail import send_mail
@@ -6,12 +7,11 @@ from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from rest_framework.exceptions import AuthenticationFailed, ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from django.conf import settings
-
 from .models import User
 
 
 password_reset_token_generator = PasswordResetTokenGenerator()
+email_verification_token_generator = PasswordResetTokenGenerator()
 
 
 def login_user(*, email: str, password: str) -> dict:
@@ -110,4 +110,80 @@ def confirm_password_reset(*, token: str, password: str) -> None:
     user.set_password(password)
     user.save(
         update_fields=["password"],
+    )
+
+
+def request_email_verification(*, user: User) -> None:
+    """
+    Generate an email verification token and send it to the
+    authenticated user's email address.
+    """
+    if user.email_verified:
+        return
+
+    uid = urlsafe_base64_encode(
+        force_bytes(user.pk),
+    )
+
+    token = email_verification_token_generator.make_token(user)
+
+    verification_token = f"{uid}:{token}"
+
+    send_mail(
+        subject="Verify Your Email Address",
+        message=(
+            "Please verify your email address for your "
+            "Smart Campus account.\n\n"
+            "Use the following verification token to continue:\n\n"
+            f"{verification_token}\n\n"
+            "If you did not request this verification, "
+            "you can safely ignore this email."
+        ),
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[user.email],
+        fail_silently=False,
+    )
+
+
+def confirm_email_verification(*, token: str) -> None:
+    """
+    Validate the email verification token and mark the user's
+    email address as verified.
+    """
+    try:
+        uid, verification_token = token.split(":", 1)
+
+        user_id = urlsafe_base64_decode(uid).decode()
+
+        user = User.objects.get(
+            pk=user_id,
+            is_active=True,
+        )
+    except (
+        ValueError,
+        TypeError,
+        UnicodeDecodeError,
+        User.DoesNotExist,
+    ):
+        raise ValidationError(
+            {"token": "Invalid or expired email verification token."}
+        )
+
+    if user.email_verified:
+        raise ValidationError(
+            {"token": "Email address is already verified."}
+        )
+
+    if not email_verification_token_generator.check_token(
+        user,
+        verification_token,
+    ):
+        raise ValidationError(
+            {"token": "Invalid or expired email verification token."}
+        )
+
+    user.email_verified = True
+
+    user.save(
+        update_fields=["email_verified"],
     )

@@ -5,15 +5,18 @@ from apps.common.responses import success_response
 
 from .presenters import present_current_user, present_login
 from .serializers import (
+    EmailVerificationConfirmSerializer,
     LoginSerializer,
     LogoutSerializer,
     PasswordResetConfirmSerializer,
     PasswordResetRequestSerializer,
 )
 from .services import (
+    confirm_email_verification,
     confirm_password_reset,
     login_user,
     logout_user,
+    request_email_verification,
     request_password_reset,
 )
 
@@ -101,5 +104,38 @@ class PasswordResetConfirmAPIView(APIView):
 
         return success_response(
             message="Password has been reset successfully.",
+            data=None,
+        )
+
+
+class EmailVerificationRequestAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        request_email_verification(
+            user=request.user,
+        )
+
+        return success_response(
+            message="Email verification instructions have been sent.",
+            data=None,
+        )
+
+
+class EmailVerificationConfirmAPIView(APIView):
+    permission_classes = []
+
+    def post(self, request):
+        serializer = EmailVerificationConfirmSerializer(
+            data=request.data,
+        )
+        serializer.is_valid(raise_exception=True)
+
+        confirm_email_verification(
+            token=serializer.validated_data["token"],
+        )
+
+        return success_response(
+            message="Email address verified successfully.",
             data=None,
         )
