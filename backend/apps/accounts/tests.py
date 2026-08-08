@@ -2,7 +2,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.core import mail
 from django.test import TestCase, override_settings
 from rest_framework.request import Request
-from rest_framework.test import APIRequestFactory
+from rest_framework.test import APIRequestFactory, APITestCase
 
 from .models import Role, User
 from .permissions import (
@@ -345,4 +345,118 @@ class EmailVerificationTests(TestCase):
         self.assertEqual(
             len(mail.outbox),
             0,
+        )
+
+class SessionValidationTests(APITestCase):
+    def setUp(self):
+        self.role = Role.objects.get(
+            name=Role.RoleName.STUDENT,
+        )
+
+        self.user = User.objects.create_user(
+            email="session@example.com",
+            password="TestPassword123!",
+            username="session_user",
+            role=self.role,
+        )
+
+    def test_valid_access_token_is_accepted(self):
+        response = self.client.post(
+            "/api/v1/auth/login/",
+            {
+                "email": self.user.email,
+                "password": "TestPassword123!",
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+
+        access_token = response.data["data"]["tokens"]["access"]
+
+        response = self.client.post(
+            "/api/v1/auth/session/validate/",
+            {
+                "token": access_token,
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+
+        self.assertTrue(
+            response.data["success"],
+        )
+
+        self.assertEqual(
+            response.data["message"],
+            "Session is valid.",
+        )
+
+    def test_invalid_access_token_is_rejected(self):
+        response = self.client.post(
+            "/api/v1/auth/session/validate/",
+            {
+                "token": "invalid-access-token",
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            401,
+        )
+
+        self.assertFalse(
+            response.data["success"],
+        )
+
+    def test_expired_access_token_is_rejected(self):
+        from datetime import timedelta
+
+        from rest_framework_simplejwt.tokens import AccessToken
+
+        token = AccessToken.for_user(self.user)
+
+        token.set_exp(
+            lifetime=timedelta(seconds=-1),
+        )
+
+        response = self.client.post(
+            "/api/v1/auth/session/validate/",
+            {
+                "token": str(token),
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            401,
+        )
+
+        self.assertFalse(
+            response.data["success"],
+        )
+
+    def test_missing_token_is_rejected(self):
+        response = self.client.post(
+            "/api/v1/auth/session/validate/",
+            {},
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            400,
+        )
+
+        self.assertFalse(
+            response.data["success"],
         )

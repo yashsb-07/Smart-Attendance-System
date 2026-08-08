@@ -10,6 +10,7 @@ from .serializers import (
     LogoutSerializer,
     PasswordResetConfirmSerializer,
     PasswordResetRequestSerializer,
+    SessionValidationSerializer,
 )
 from .services import (
     confirm_email_verification,
@@ -137,5 +138,19 @@ class EmailVerificationConfirmAPIView(APIView):
 
         return success_response(
             message="Email address verified successfully.",
+            data=None,
+        )
+
+class SessionValidationAPIView(APIView):
+    permission_classes = []
+
+    def post(self, request):
+        serializer = SessionValidationSerializer(
+            data=request.data,
+        )
+        serializer.is_valid(raise_exception=True)
+
+        return success_response(
+            message="Session is valid.",
             data=None,
         )

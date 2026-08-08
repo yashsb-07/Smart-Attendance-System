@@ -8,6 +8,7 @@ from .views import (
     LogoutAPIView,
     PasswordResetConfirmAPIView,
     PasswordResetRequestAPIView,
+    SessionValidationAPIView,
 )
 
 
@@ -49,5 +50,11 @@ urlpatterns = [
         "email-verification/confirm/",
         EmailVerificationConfirmAPIView.as_view(),
         name="email-verification-confirm",
+    ),
+
+    path(
+        "session/validate/",
+        SessionValidationAPIView.as_view(),
+        name="session-validate",
     ),
 ]
