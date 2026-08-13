@@ -1,0 +1,12 @@
+$kind: http-request
+name: User Role Assignment
+url: "{{baseURL}}users/3/role/"
+method: PATCH
+body:
+  type: json
+  content: "{\r\n    \"role\": 2\r\n}"
+auth:
+  type: bearer
+  credentials:
+    token: "{{supabase_service_role_api_key_0nbv}}"
+order: 4495066607757720

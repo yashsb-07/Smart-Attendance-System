@@ -1,0 +1,12 @@
+$kind: http-request
+name: Refresh
+url: "{{baseURL}}api/v1/auth/token/refresh/"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"refresh\": \"{{supabase_service_role_api_key_0fsl}}\"\r
+
+    }"
+order: 2715575910015781

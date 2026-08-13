@@ -9,6 +9,11 @@ from .views import (
     PasswordResetConfirmAPIView,
     PasswordResetRequestAPIView,
     SessionValidationAPIView,
+    UserDetailAPIView,
+    UserListCreateAPIView,
+    UserProfileAPIView,
+    UserRoleAPIView,
+    UserStatusAPIView,
 )
 
 
@@ -16,6 +21,7 @@ app_name = "accounts"
 
 
 urlpatterns = [
+    # Authentication
     path(
         "login/",
         LoginAPIView.as_view(),
@@ -51,10 +57,36 @@ urlpatterns = [
         EmailVerificationConfirmAPIView.as_view(),
         name="email-verification-confirm",
     ),
-
     path(
         "session/validate/",
         SessionValidationAPIView.as_view(),
         name="session-validate",
+    ),
+
+    # User Management
+    path(
+        "users/",
+        UserListCreateAPIView.as_view(),
+        name="user-list-create",
+    ),
+    path(
+        "users/<int:user_id>/",
+        UserDetailAPIView.as_view(),
+        name="user-detail",
+    ),
+    path(
+        "users/<int:user_id>/status/",
+        UserStatusAPIView.as_view(),
+        name="user-status",
+    ),
+    path(
+        "users/<int:user_id>/role/",
+        UserRoleAPIView.as_view(),
+        name="user-role",
+    ),
+    path(
+        "users/profile/",
+        UserProfileAPIView.as_view(),
+        name="user-profile",
     ),
 ]

@@ -1,0 +1,51 @@
+$kind: collection
+name: Smart Campus API
+variables:
+  - key: json_web_token_13fk
+    secret: true
+    disabled: false
+  - key: supabase_service_role_api_key_10kz
+    secret: true
+    disabled: false
+  - key: supabase_service_role_api_key_0sag
+    secret: true
+    disabled: false
+  - key: supabase_service_role_api_key_0fsl
+    secret: true
+    disabled: false
+  - key: json_web_token_1b67
+    secret: true
+    disabled: false
+  - key: supabase_service_role_api_key_0n26
+    secret: true
+    disabled: false
+  - key: supabase_service_role_api_key_0hud
+    secret: true
+    disabled: false
+  - key: supabase_service_role_api_key_0vdg
+    secret: true
+    disabled: false
+  - key: json_web_token_0i97
+    secret: true
+    disabled: false
+  - key: supabase_service_role_api_key_022y
+    secret: true
+    disabled: false
+  - key: json_web_token_0mm7
+    secret: true
+    disabled: false
+  - key: supabase_service_role_api_key_0mm7
+    secret: true
+    disabled: false
+  - key: json_web_token_0nbv
+    secret: true
+    disabled: false
+  - key: supabase_service_role_api_key_0nbv
+    secret: true
+    disabled: false
+  - key: supabase_service_role_api_key_0jjo
+    secret: true
+    disabled: false
+  - key: json_web_token_07cs
+    secret: true
+    disabled: false

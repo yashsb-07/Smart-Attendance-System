@@ -1,0 +1,9 @@
+$kind: http-request
+name: Current User
+url: "{{baseURL}}api/v1/auth/me/"
+method: GET
+auth:
+  type: bearer
+  credentials:
+    token: "{{supabase_service_role_api_key_0vdg}}"
+order: 84272217824771

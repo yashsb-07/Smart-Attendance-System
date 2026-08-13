@@ -1,0 +1,26 @@
+$kind: http-request
+name: Create User
+url: "{{baseURL}}users/"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"username\": \"test3\",\r
+
+    \    \"email\": \"test3@gmail.com\",\r
+
+    \    \"password\": \"Test3@123\",\r
+
+    \    \"first_name\": \"Test3\",\r
+
+    \    \"last_name\": \"Faculty3\",\r
+
+    \    \"role\": 4\r
+
+    }"
+auth:
+  type: bearer
+  credentials:
+    token: "{{supabase_service_role_api_key_0mm7}}"
+order: 1786605992212

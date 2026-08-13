@@ -1,5 +1,17 @@
-"""
-Selectors for the Accounts module.
+from django.db.models import QuerySet
 
-Read-only database queries will be implemented here.
-"""
+from .models import User
+
+
+def get_user_by_id(*, user_id: int) -> User:
+    return User.objects.select_related("role").get(
+        pk=user_id,
+    )
+
+
+def list_users() -> QuerySet:
+    return (
+        User.objects
+        .select_related("role")
+        .order_by("id")
+    )

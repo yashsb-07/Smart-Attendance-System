@@ -12,6 +12,30 @@ def present_user(user):
     }
 
 
+def present_managed_user(user):
+    """
+    Format a User Management API representation.
+    """
+    data = present_user(user)
+
+    data.update(
+        {
+            "is_active": user.is_active,
+            "is_staff": user.is_staff,
+            "is_superuser": user.is_superuser,
+            "role": {
+                "id": user.role.id,
+                "name": user.role.name,
+                "label": user.role.get_name_display(),
+            },
+            "date_joined": user.date_joined,
+            "last_login": user.last_login,
+        }
+    )
+
+    return data
+
+
 def present_login(auth_data):
     """
     Format the login response payload.
@@ -33,8 +57,14 @@ def present_current_user(user):
 
     data.update(
         {
+            "is_active": user.is_active,
             "is_staff": user.is_staff,
             "is_superuser": user.is_superuser,
+            "role": {
+                "id": user.role.id,
+                "name": user.role.name,
+                "label": user.role.get_name_display(),
+            },
         }
     )
 

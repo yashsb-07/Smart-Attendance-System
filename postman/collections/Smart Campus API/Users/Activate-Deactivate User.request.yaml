@@ -1,0 +1,12 @@
+$kind: http-request
+name: Activate/Deactivate User
+url: "{{baseURL}}users/4/status/"
+method: PATCH
+body:
+  type: json
+  content: "{\r\n    \"is_active\": true\r\n}"
+auth:
+  type: bearer
+  credentials:
+    token: "{{supabase_service_role_api_key_0nbv}}"
+order: 3392539307523641

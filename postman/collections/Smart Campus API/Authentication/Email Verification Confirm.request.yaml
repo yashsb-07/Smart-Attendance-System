@@ -1,0 +1,12 @@
+$kind: http-request
+name: Email Verification Confirm
+url: "{{baseURL}}api/v1/auth/email-verification/confirm/"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"token\": \"Mg:dd92yu-c807f2132e05200b3c1b0b26a4f527a2\"\r
+
+    }"
+order: 4348560471073986

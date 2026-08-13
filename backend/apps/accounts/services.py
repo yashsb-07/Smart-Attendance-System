@@ -2,6 +2,7 @@ from django.conf import settings
 from django.contrib.auth import authenticate
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.core.mail import send_mail
+from django.db import transaction
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from rest_framework.exceptions import AuthenticationFailed, ValidationError
@@ -108,6 +109,7 @@ def confirm_password_reset(*, token: str, password: str) -> None:
         )
 
     user.set_password(password)
+
     user.save(
         update_fields=["password"],
     )
@@ -187,3 +189,83 @@ def confirm_email_verification(*, token: str) -> None:
     user.save(
         update_fields=["email_verified"],
     )
+
+
+@transaction.atomic
+def update_user(*, user: User, validated_data: dict) -> User:
+    """
+    Update an administratively managed user.
+    """
+    email_changed = (
+        "email" in validated_data
+        and validated_data["email"].lower() != user.email.lower()
+    )
+
+    for field, value in validated_data.items():
+        setattr(user, field, value)
+
+    if email_changed:
+        user.email_verified = False
+
+    update_fields = list(validated_data.keys())
+
+    if email_changed:
+        update_fields.append("email_verified")
+
+    user.save(
+        update_fields=update_fields,
+    )
+
+    return user
+
+
+@transaction.atomic
+def update_user_profile(*, user: User, validated_data: dict) -> User:
+    """
+    Update the authenticated user's own profile.
+    """
+    email_changed = (
+        "email" in validated_data
+        and validated_data["email"].lower() != user.email.lower()
+    )
+
+    for field, value in validated_data.items():
+        setattr(user, field, value)
+
+    if email_changed:
+        user.email_verified = False
+
+    update_fields = list(validated_data.keys())
+
+    if email_changed:
+        update_fields.append("email_verified")
+
+    user.save(
+        update_fields=update_fields,
+    )
+
+    return user
+
+
+def update_user_status(*, user: User, is_active: bool) -> User:
+    user.is_active = is_active
+
+    user.save(
+        update_fields=["is_active"],
+    )
+
+    return user
+
+
+def update_user_role(*, user: User, role) -> User:
+    user.role = role
+
+    user.save(
+        update_fields=["role"],
+    )
+
+    return user
+
+
+def delete_user(*, user: User) -> None:
+    user.delete()

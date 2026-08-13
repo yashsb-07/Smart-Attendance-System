@@ -1,0 +1,22 @@
+$kind: http-request
+name: Update User
+url: "{{baseURL}}users/3/"
+method: PATCH
+body:
+  type: json
+  content: "{\r
+
+    \    \"username\": \"shwetali01\",\r
+
+    \    \"email\": \"shwetali@gmail.com\",\r
+
+    \    \"first_name\": \"Shwetali\",\r
+
+    \    \"last_name\": \"Kulkarni\"\r
+
+    }"
+auth:
+  type: bearer
+  credentials:
+    token: "{{json_web_token_0nbv}}"
+order: 2755968010667930
