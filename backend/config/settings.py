@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     # Local Applications
     "apps.accounts.apps.AccountsConfig",
     "apps.common.apps.CommonConfig",
+    "apps.institutions.apps.InstitutionsConfig",
 ]
 
 AUTH_USER_MODEL = "accounts.User"
