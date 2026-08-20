@@ -241,3 +241,109 @@ class InstitutionModelConstraintTests(TestCase):
                 name="Institution Two",
                 code="INST001",
             )
+
+class InstitutionPermissionTests(APITestCase):
+    def create_user_with_role(self, role_name, email, username):
+        role = Role.objects.get(
+            name=role_name,
+        )
+
+        return User.objects.create_user(
+            email=email,
+            password="TestPassword123!",
+            username=username,
+            role=role,
+        )
+
+    def authenticate_user(self, user):
+        refresh = RefreshToken.for_user(user)
+
+        self.client.credentials(
+            HTTP_AUTHORIZATION=(
+                f"Bearer {refresh.access_token}"
+            ),
+        )
+
+    def test_super_administrator_can_manage_institutions(self):
+        user = self.create_user_with_role(
+            Role.RoleName.SUPER_ADMINISTRATOR,
+            "superadmin-rbac@example.com",
+            "superadmin_rbac",
+        )
+
+        self.authenticate_user(user)
+
+        response = self.client.get(
+            "/api/v1/institutions/",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+
+    def test_institution_administrator_cannot_manage_institutions(self):
+        user = self.create_user_with_role(
+            Role.RoleName.INSTITUTION_ADMINISTRATOR,
+            "institutionadmin-rbac@example.com",
+            "institutionadmin_rbac",
+        )
+
+        self.authenticate_user(user)
+
+        response = self.client.get(
+            "/api/v1/institutions/",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            403,
+        )
+
+    def test_faculty_cannot_manage_institutions(self):
+        user = self.create_user_with_role(
+            Role.RoleName.FACULTY,
+            "faculty-rbac@example.com",
+            "faculty_rbac",
+        )
+
+        self.authenticate_user(user)
+
+        response = self.client.get(
+            "/api/v1/institutions/",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            403,
+        )
+
+    def test_student_cannot_manage_institutions(self):
+        user = self.create_user_with_role(
+            Role.RoleName.STUDENT,
+            "student-rbac@example.com",
+            "student_rbac",
+        )
+
+        self.authenticate_user(user)
+
+        response = self.client.get(
+            "/api/v1/institutions/",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            403,
+        )
+
+    def test_unauthenticated_user_cannot_manage_institutions(self):
+        self.client.credentials()
+
+        response = self.client.get(
+            "/api/v1/institutions/",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            401,
+        )
