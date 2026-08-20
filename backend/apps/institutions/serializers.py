@@ -58,3 +58,47 @@ class InstitutionSerializer(serializers.ModelSerializer):
             )
 
         return value
+
+    def validate_email(self, value):
+        if value is None:
+            return value
+
+        value = value.strip()
+
+        if not value:
+            return None
+
+        return value
+
+    def validate_phone(self, value):
+        if value is None:
+            return value
+
+        value = value.strip()
+
+        if not value:
+            return None
+
+        return value
+
+    def validate_address(self, value):
+        if value is None:
+            return value
+
+        value = value.strip()
+
+        if not value:
+            return None
+
+        return value
+
+    def validate_description(self, value):
+        if value is None:
+            return value
+
+        value = value.strip()
+
+        if not value:
+            return None
+
+        return value

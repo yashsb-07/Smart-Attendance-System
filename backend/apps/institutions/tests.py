@@ -347,3 +347,215 @@ class InstitutionPermissionTests(APITestCase):
             response.status_code,
             401,
         )
+
+class InstitutionValidationTests(APITestCase):
+    def setUp(self):
+        role = Role.objects.get(
+            name=Role.RoleName.SUPER_ADMINISTRATOR,
+        )
+
+        user = User.objects.create_user(
+            email="validation-superadmin@example.com",
+            password="TestPassword123!",
+            username="validation_superadmin",
+            role=role,
+        )
+
+        refresh = RefreshToken.for_user(user)
+
+        self.client.credentials(
+            HTTP_AUTHORIZATION=(
+                f"Bearer {refresh.access_token}"
+            ),
+        )
+
+    def test_empty_name_is_rejected(self):
+        response = self.client.post(
+            "/api/v1/institutions/",
+            {
+                "name": "   ",
+                "code": "VALID001",
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            400,
+        )
+
+        self.assertFalse(
+            response.data["success"],
+        )
+
+    def test_empty_code_is_rejected(self):
+        response = self.client.post(
+            "/api/v1/institutions/",
+            {
+                "name": "Valid Institution",
+                "code": "   ",
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            400,
+        )
+
+        self.assertFalse(
+            response.data["success"],
+        )
+
+    def test_missing_name_is_rejected(self):
+        response = self.client.post(
+            "/api/v1/institutions/",
+            {
+                "code": "VALID002",
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            400,
+        )
+
+        self.assertFalse(
+            response.data["success"],
+        )
+
+    def test_missing_code_is_rejected(self):
+        response = self.client.post(
+            "/api/v1/institutions/",
+            {
+                "name": "Valid Institution",
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            400,
+        )
+
+        self.assertFalse(
+            response.data["success"],
+        )
+
+    def test_duplicate_code_is_rejected_case_insensitively(self):
+        Institution.objects.create(
+            name="Existing Institution",
+            code="UNIQUE001",
+        )
+
+        response = self.client.post(
+            "/api/v1/institutions/",
+            {
+                "name": "Another Institution",
+                "code": "unique001",
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            400,
+        )
+
+        self.assertFalse(
+            response.data["success"],
+        )
+
+    def test_invalid_email_is_rejected(self):
+        response = self.client.post(
+            "/api/v1/institutions/",
+            {
+                "name": "Valid Institution",
+                "code": "VALID003",
+                "email": "not-an-email",
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            400,
+        )
+
+        self.assertFalse(
+            response.data["success"],
+        )
+
+    def test_invalid_website_is_rejected(self):
+        response = self.client.post(
+            "/api/v1/institutions/",
+            {
+                "name": "Valid Institution",
+                "code": "VALID004",
+                "website": "not-a-url",
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            400,
+        )
+
+        self.assertFalse(
+            response.data["success"],
+        )
+
+    def test_invalid_institution_id_returns_not_found(self):
+        response = self.client.get(
+            "/api/v1/institutions/999999/",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            404,
+        )
+
+        self.assertFalse(
+            response.data["success"],
+        )
+
+    def test_empty_optional_text_values_are_normalized(self):
+        response = self.client.post(
+            "/api/v1/institutions/",
+            {
+                "name": "Normalized Institution",
+                "code": "VALID005",
+                "description": "   ",
+                "email": "   ",
+                "phone": "   ",
+                "address": "   ",
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            201,
+        )
+
+        institution = Institution.objects.get(
+            code="VALID005",
+        )
+
+        self.assertIsNone(
+            institution.description,
+        )
+
+        self.assertIsNone(
+            institution.email,
+        )
+
+        self.assertIsNone(
+            institution.phone,
+        )
+
+        self.assertIsNone(
+            institution.address,
+        )
