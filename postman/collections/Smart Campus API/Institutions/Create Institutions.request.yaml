@@ -1,0 +1,30 @@
+$kind: http-request
+name: Create Institutions
+url: "{{baseURL}}institutions/"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"name\": \"Another\",\r
+
+    \    \"code\": \"PIT009\",\r
+
+    \    \"description\": \" Sakshi Yash Bansode\",\r
+
+    \    \"email\": \"admin@pit\",\r
+
+    \    \"phone\": \"+918888881111\",\r
+
+    \    \"address\": \"Pune, Maharashtra\",\r
+
+    \    \"website\": \"https://pit\",\r
+
+    \    \"is_active\": true\r
+
+    }\r\n"
+auth:
+  type: bearer
+  credentials:
+    token: "{{json_web_token_0h4d}}"
+order: 1786903750470

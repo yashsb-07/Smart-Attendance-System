@@ -1,0 +1,18 @@
+$kind: http-request
+name: Update Institutions
+url: "{{baseURL}}institutions/1/"
+method: PATCH
+body:
+  type: json
+  content: "{\r
+
+    \    \"name\": \"Pune Institute of Technology\",\r
+
+    \    \"phone\": \"+912099999922\"\r
+
+    }"
+auth:
+  type: bearer
+  credentials:
+    token: "{{json_web_token_0ou2}}"
+order: 3767063962597665

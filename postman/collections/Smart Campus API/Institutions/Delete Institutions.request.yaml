@@ -1,0 +1,9 @@
+$kind: http-request
+name: Delete Institutions
+url: "{{baseURL}}institutions/3/"
+method: DELETE
+auth:
+  type: bearer
+  credentials:
+    token: "{{json_web_token_02eq}}"
+order: 4033794070572875

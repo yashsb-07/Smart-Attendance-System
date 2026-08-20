@@ -1,0 +1,9 @@
+$kind: http-request
+name: Get Specific Institutions
+url: "{{baseURL}}institutions/9999/"
+method: GET
+auth:
+  type: bearer
+  credentials:
+    token: "{{supabase_service_role_api_key_0h4d}}"
+order: 1264098839038120

@@ -1,0 +1,9 @@
+$kind: http-request
+name: Get Institutions
+url: "{{baseURL}}institutions/"
+method: GET
+auth:
+  type: bearer
+  credentials:
+    token: "{{json_web_token_02eq}}"
+order: 708232071033522

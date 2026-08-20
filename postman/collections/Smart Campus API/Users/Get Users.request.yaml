@@ -1,9 +1,9 @@
 $kind: http-request
 name: Get Users
-url: "{{baseURL}}users/"
+url: "{{baseURL}}auth/users/"
 method: GET
 auth:
   type: bearer
   credentials:
-    token: "{{json_web_token_07cs}}"
+    token: "{{supabase_service_role_api_key_02eq}}"
 order: 1064432587663206
