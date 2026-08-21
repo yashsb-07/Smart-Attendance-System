@@ -317,3 +317,116 @@ class DepartmentAPITests(APITestCase):
             response.status_code,
             status.HTTP_401_UNAUTHORIZED,
         )
+
+class DepartmentPermissionTests(APITestCase):
+    def setUp(self):
+        self.institution = Institution.objects.create(
+            name="Test Institution",
+            code="TEST001",
+        )
+
+        self.department = Department.objects.create(
+            institution=self.institution,
+            name="Computer Science",
+            code="CSE",
+        )
+
+        self.super_admin_role = Role.objects.get(
+            name=Role.RoleName.SUPER_ADMINISTRATOR,
+        )
+
+        self.institution_admin_role = Role.objects.get(
+            name=Role.RoleName.INSTITUTION_ADMINISTRATOR,
+        )
+
+        self.faculty_role = Role.objects.get(
+            name=Role.RoleName.FACULTY,
+        )
+
+        self.student_role = Role.objects.get(
+            name=Role.RoleName.STUDENT,
+        )
+
+    def authenticate_as(self, role):
+        user = User.objects.create_user(
+            email=f"{role.name}@example.com",
+            password="TestPassword123!",
+            username=role.name,
+            role=role,
+        )
+
+        refresh = RefreshToken.for_user(user)
+
+        self.client.credentials(
+            HTTP_AUTHORIZATION=(
+                f"Bearer {refresh.access_token}"
+            ),
+        )
+
+    def test_super_administrator_can_list_departments(self):
+        self.authenticate_as(
+            self.super_admin_role,
+        )
+
+        response = self.client.get(
+            "/api/v1/departments/",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK,
+        )
+
+    def test_institution_administrator_cannot_manage_departments_yet(self):
+        self.authenticate_as(
+            self.institution_admin_role,
+        )
+
+        response = self.client.get(
+            "/api/v1/departments/",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_403_FORBIDDEN,
+        )
+
+    def test_faculty_cannot_manage_departments(self):
+        self.authenticate_as(
+            self.faculty_role,
+        )
+
+        response = self.client.get(
+            "/api/v1/departments/",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_403_FORBIDDEN,
+        )
+
+    def test_student_cannot_manage_departments(self):
+        self.authenticate_as(
+            self.student_role,
+        )
+
+        response = self.client.get(
+            "/api/v1/departments/",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_403_FORBIDDEN,
+        )
+
+    def test_unauthenticated_user_cannot_manage_departments(self):
+        self.client.credentials()
+
+        response = self.client.get(
+            "/api/v1/departments/",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_401_UNAUTHORIZED,
+        )

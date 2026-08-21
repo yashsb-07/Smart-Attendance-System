@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from .permissions import CanManageDepartments
 from rest_framework.views import APIView
 
 from apps.common.responses import success_response
@@ -17,7 +17,7 @@ from .services import (
 
 
 class DepartmentListCreateAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [CanManageDepartments]
 
     def get(self, request):
         departments = list_departments()
@@ -52,7 +52,7 @@ class DepartmentListCreateAPIView(APIView):
 
 
 class DepartmentDetailAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [CanManageDepartments]
 
     def get_department(self, department_id):
         return get_object_or_404(
