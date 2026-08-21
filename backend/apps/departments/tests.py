@@ -318,6 +318,172 @@ class DepartmentAPITests(APITestCase):
             status.HTTP_401_UNAUTHORIZED,
         )
 
+    def test_create_department_missing_required_fields(self):
+        response = self.client.post(
+            "/api/v1/departments/",
+            {},
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_400_BAD_REQUEST,
+        )
+
+        self.assertFalse(
+            response.data["success"],
+        )
+
+        self.assertIn(
+            "institution",
+            response.data["errors"],
+        )
+
+        self.assertIn(
+            "name",
+            response.data["errors"],
+        )
+
+        self.assertIn(
+            "code",
+            response.data["errors"],
+        )
+
+    def test_create_department_rejects_blank_name(self):
+        response = self.create_department(
+            name="   ",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_400_BAD_REQUEST,
+        )
+
+        self.assertFalse(
+            response.data["success"],
+        )
+
+        self.assertIn(
+            "name",
+            response.data["errors"],
+        )
+
+    def test_create_department_rejects_blank_code(self):
+        response = self.create_department(
+            code="   ",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_400_BAD_REQUEST,
+        )
+
+        self.assertFalse(
+            response.data["success"],
+        )
+
+        self.assertIn(
+            "code",
+            response.data["errors"],
+        )
+
+    def test_create_department_rejects_duplicate_code_within_institution(
+        self,
+    ):
+        Department.objects.create(
+            institution=self.institution,
+            name="Computer Science",
+            code="CSE",
+        )
+
+        response = self.create_department(
+            name="Information Technology",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_400_BAD_REQUEST,
+        )
+
+        self.assertFalse(
+            response.data["success"],
+        )
+
+        self.assertIn(
+            "code",
+            response.data["errors"],
+        )
+
+    def test_create_department_rejects_invalid_institution(self):
+        response = self.create_department(
+            institution=999999,
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_400_BAD_REQUEST,
+        )
+
+        self.assertFalse(
+            response.data["success"],
+        )
+
+        self.assertIn(
+            "institution",
+            response.data["errors"],
+        )
+
+    def test_get_nonexistent_department_returns_not_found(self):
+        response = self.client.get(
+            "/api/v1/departments/999999/",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_404_NOT_FOUND,
+        )
+
+        self.assertFalse(
+            response.data["success"],
+        )
+
+    def test_update_department_rejects_duplicate_code_within_institution(
+        self,
+    ):
+        Department.objects.create(
+            institution=self.institution,
+            name="Computer Science",
+            code="CSE",
+        )
+
+        second_department = Department.objects.create(
+            institution=self.institution,
+            name="Information Technology",
+            code="IT",
+        )
+
+        response = self.client.patch(
+            f"/api/v1/departments/{second_department.id}/",
+            {
+                "code": "CSE",
+            },
+            format="json",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_400_BAD_REQUEST,
+        )
+
+        self.assertFalse(
+            response.data["success"],
+        )
+
+        self.assertIn(
+            "code",
+            response.data["errors"],
+        )
+
 class DepartmentPermissionTests(APITestCase):
     def setUp(self):
         self.institution = Institution.objects.create(
