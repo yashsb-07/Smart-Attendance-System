@@ -32,6 +32,11 @@ urlpatterns = [
     ),
 
     path(
+        "api/v1/departments/",
+        include("apps.departments.urls"),
+    ),
+
+    path(
         "api/v1/auth/token/refresh/",
         TokenRefreshView.as_view(),
         name="token_refresh",
