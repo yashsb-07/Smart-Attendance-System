@@ -1,0 +1,9 @@
+$kind: http-request
+name: Retrieve Dept
+url: "{{baseURL}}departments/222/"
+method: GET
+auth:
+  type: bearer
+  credentials:
+    token: "{{json_web_token_0qan}}"
+order: 3258746991645449

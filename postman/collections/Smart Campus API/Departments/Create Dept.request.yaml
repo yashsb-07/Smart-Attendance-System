@@ -1,0 +1,24 @@
+$kind: http-request
+name: Create Dept
+url: "{{baseURL}}departments/"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"institution\": 1,\r
+
+    \    \"name\": \"Mechanical Engineering\",\r
+
+    \    \"code\": \"ME\",\r
+
+    \    \"description\": \"Mechanical Engineering Department\",\r
+
+    \    \"is_active\": true\r
+
+    }"
+auth:
+  type: bearer
+  credentials:
+    token: "{{supabase_service_role_api_key_0r56}}"
+order: 1787314429204

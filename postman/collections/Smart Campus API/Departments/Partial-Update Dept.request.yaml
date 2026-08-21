@@ -1,0 +1,12 @@
+$kind: http-request
+name: Partial-Update Dept
+url: "{{baseURL}}departments/1/"
+method: PATCH
+body:
+  type: json
+  content: "{\r\n    \"institution\": 2\r\n}"
+auth:
+  type: bearer
+  credentials:
+    token: "{{json_web_token_0qan}}"
+order: 4089220254214088

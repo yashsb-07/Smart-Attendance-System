@@ -1,9 +1,9 @@
 $kind: http-request
-name: Get Users
-url: "{{baseURL}}auth/users/"
+name: List Dept
+url: "{{baseURL}}departments/"
 method: GET
 auth:
   type: bearer
   credentials:
     token: "{{json_web_token_0r56}}"
-order: 1064432587663206
+order: 3220428055886428

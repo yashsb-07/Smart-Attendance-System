@@ -1,9 +1,9 @@
 $kind: http-request
-name: Get Institutions
-url: "{{baseURL}}institutions/"
-method: GET
+name: Delete Dept
+url: "{{baseURL}}departments/2/"
+method: DELETE
 auth:
   type: bearer
   credentials:
     token: "{{supabase_service_role_api_key_0qan}}"
-order: 708232071033522
+order: 4423479923547612

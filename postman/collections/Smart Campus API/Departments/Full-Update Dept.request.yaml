@@ -1,0 +1,24 @@
+$kind: http-request
+name: Full-Update Dept
+url: "{{baseURL}}departments/1/"
+method: PUT
+body:
+  type: json
+  content: "{\r
+
+    \    \"institution\": 1,\r
+
+    \    \"name\": \"Information Technology\",\r
+
+    \    \"code\": \"IT\",\r
+
+    \    \"description\": \"Information Technology Department\",\r
+
+    \    \"is_active\": true\r
+
+    }"
+auth:
+  type: bearer
+  credentials:
+    token: "{{supabase_service_role_api_key_0qan}}"
+order: 3704198008401027
