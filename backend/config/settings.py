@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "apps.common.apps.CommonConfig",
     "apps.institutions.apps.InstitutionsConfig",
     "apps.departments.apps.DepartmentsConfig",
+    "apps.academic.apps.AcademicConfig",
 ]
 
 AUTH_USER_MODEL = "accounts.User"

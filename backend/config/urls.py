@@ -37,6 +37,11 @@ urlpatterns = [
     ),
 
     path(
+        "api/v1/academic-years/",
+        include("apps.academic.urls"),
+    ),
+
+    path(
         "api/v1/auth/token/refresh/",
         TokenRefreshView.as_view(),
         name="token_refresh",
